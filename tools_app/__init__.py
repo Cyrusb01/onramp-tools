@@ -3,7 +3,7 @@ from flask import Flask
 
 
 def init_app():
-    """Construct core Flask application."""
+    """Construct core Flask with embedded Dash application."""
     app = Flask(__name__)
 
     with app.app_context():

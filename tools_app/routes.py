@@ -7,4 +7,9 @@ from flask import current_app as app
 def home():
     """Landing page."""
     return "Hello World"
+
+@app.route('/markets')
+def markets():
+    """Landing page."""
+    return "Markets"
     
