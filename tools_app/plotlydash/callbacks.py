@@ -3,16 +3,13 @@ import plotly.express as px
 import pandas as pd
 import numpy as np
 import dash
-#from dash_app import dash_app
 from dash.dependencies import Output, Input, State
 import datetime
 from datetime import timedelta
 import time 
 import pytz
 import bt
-import redis
 from direct_redis import DirectRedis
-import pyarrow as pa
 import urllib.parse as urlparse
 from .formatting import onramp_colors, onramp_template, onramp_template_dashboard, custom_scale
 from .helpers import *

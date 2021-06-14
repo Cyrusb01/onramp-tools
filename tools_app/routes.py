@@ -11,5 +11,5 @@ def home():
 @app.route('/markets')
 def markets():
     """Landing page."""
-    return "Markets"
+    return render_template("markets.html")
     
