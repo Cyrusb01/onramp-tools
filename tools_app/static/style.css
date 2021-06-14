@@ -1,0 +1,16 @@
+.header {
+  padding: 0px;
+  text-align: center;
+  background: #131c4f;
+  color: white;
+  font-size: 30px;
+}
+
+  /* Create four equal columns that floats next to each other */
+.column {
+  float: left;
+  display: table;
+  width: 25%;
+  height: 100%;
+}
+
