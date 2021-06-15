@@ -1249,11 +1249,11 @@ def DisplayScatter():
             dcc.Loading(id = "loading-scatter", children=
             dcc.Graph(
                 id = "scatter_plot_c",
-                style= {"responsive": True, "height": 350}
+                style= {"responsive": True, "height": 370}
             )
             )
         ]),  
-    ], className= "text-center mb-2 mr-2", style= {"max-width" : "100%", "margin": "auto", "height": "29rem"}, color= onramp_colors["dark_blue"], inverse = True)
+    ], className= "text-center mb-2 mr-2", style= {"max-width" : "100%", "margin": "auto", "height": "30rem"}, color= onramp_colors["dark_blue"], inverse = True)
 
     return scat        
 
@@ -1268,7 +1268,7 @@ def DisplayStats():
             )
             )
         ]),  
-    ], className= "text-center mb-2", style= {"max-width" : "100%", "margin": "auto", "height": "29rem"}, color= onramp_colors["dark_blue"], inverse = True)
+    ], className= "text-center mb-2", style= {"max-width" : "100%", "margin": "auto", "height": "30rem"}, color= onramp_colors["dark_blue"], inverse = True)
 
     return stats        
 
@@ -1291,7 +1291,7 @@ def DisplayReturnStats():
             
                             
         ])
-    ],  className= "text-center mb-2 mr-2", style= {"max-width" : "100%", "margin": "auto", "height": "29rem"}, color= onramp_colors["dark_blue"], inverse = True)
+    ],  className= "text-center mb-2 mr-2", style= {"max-width" : "100%", "margin": "auto", "height": "30rem"}, color= onramp_colors["dark_blue"], inverse = True)
 
     return stats      
 
@@ -1645,7 +1645,7 @@ def DisplayMonthTable():
             )
             )
         ])
-    ],  className= "text-center", style= {"max-width" : "100%", "margin": "auto", "height": "63rem"}, color= onramp_colors["dark_blue"], inverse = True)
+    ],  className= "text-center", style= {"max-width" : "100%", "margin": "auto", "height": "65rem"}, color= onramp_colors["dark_blue"], inverse = True)
 
     return stats        
 

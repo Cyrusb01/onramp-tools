@@ -394,7 +394,7 @@ def init_callbacks(dash_app):
             else:
                 title = "<b>Sharpe & Sortino Ratio<b>"
                 for i in range(len(y_combined)):
-                    y_combined[i] = y_combined[i]*100
+                    y_combined[i] = round(y_combined[i]*100, 2)
                     y_6040[i] = round(y_6040[i]*100, 2)
                     y_spy[i] = round(y_spy[i]*100, 2)
                 max_range = 4
@@ -448,13 +448,13 @@ def init_callbacks(dash_app):
                 title={
                     "text": "",
                     "y": 0.0,
-                    "x": 0.5,
+                    "x": 0.4,
                     "xanchor": "center",
                     "yanchor": "top",
                 },
                 font=dict(family="Circular STD", color="white"),
                 legend=dict(
-                    orientation="h", yanchor="bottom", y=-0.3, xanchor="left", x=0.31
+                    orientation="h", yanchor="bottom", y=-0.3, xanchor="left", x=0.20
                 ),
                 barmode="group",
                 bargap=0.15,  # gap between bars of adjacent location coordinates.
@@ -465,7 +465,7 @@ def init_callbacks(dash_app):
             # )
             fig.update_layout(xaxis_tickfont_size=19)
             fig.update_layout(titlefont=dict(size=24, color="white"))
-            fig.update_layout(margin = dict(l=10, r=0, t=0, b=0))
+            fig.update_layout(margin = dict(l=10, r=0, t=20, b=0))
 
             return fig
 
