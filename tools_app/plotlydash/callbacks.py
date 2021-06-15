@@ -1167,17 +1167,17 @@ def init_callbacks(dash_app):
                                     bt.algos.WeighSpecified(**stock_dic),
                                     bt.algos.Rebalance()]) #Creating strategy
 
-        strategy_port = bt.Strategy('Equally Weighted Portfolio', 
-                                    [bt.algos.RunMonthly(), 
-                                    bt.algos.SelectAll(), 
-                                    bt.algos.WeighEqually(),
-                                    bt.algos.Rebalance()]) #Creating strategy
+        # strategy_port = bt.Strategy('Equally Weighted Portfolio', 
+        #                             [bt.algos.RunMonthly(), 
+        #                             bt.algos.SelectAll(), 
+        #                             bt.algos.WeighEqually(),
+        #                             bt.algos.Rebalance()]) #Creating strategy
 
         test_op = bt.Backtest(strategy_op, data)
         results_op_d = bt.run(test_op)
 
-        test_port = bt.Backtest(strategy_port, data)
-        results_port = bt.run(test_port)
+        # test_port = bt.Backtest(strategy_port, data)
+        # results_port = bt.run(test_port)
 
         #table
         fig_opt_table = optomize_table(daily_opt)
@@ -1185,7 +1185,7 @@ def init_callbacks(dash_app):
         #pie_colors = [strategy_color, P6040_color, spy_color, agg_color, '#7496F3', '#B7FA59', 'brown', '#EE4444', 'gold']
         fig_pie = plotly_pie(stock_list, percent_list)
 
-        results_list = [results_op_d, results_port, results_spy, results_agg]
+        results_list = [results_op_d, results_control, results_spy, results_agg]
         fig_line = line_chart(results_list)
         fig_line.update_layout(template = onramp_template_dashboard)
 
