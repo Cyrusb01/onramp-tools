@@ -1431,7 +1431,7 @@ def Inputs():
                         dbc.Input(
                             id = "cTicker_o",
                             type= 'text',
-                            value = "btc-usd,eth-usd,bnb-usd",
+                            value = "btc-usd,eth-usd",
                             placeholder= "Enter Cryptos",
                             debounce = True,
                             style = {"width" : "100%", "height": "62%"}

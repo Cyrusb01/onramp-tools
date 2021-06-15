@@ -215,6 +215,7 @@ def line_chart(results_list):
     #         "x": .2,
     #     }  
     # )
+    fig.update_traces(hovertemplate = "%{y}<br>%{x}<extra></extra>")
     return fig
 
 def plotly_pie(stock_list, percent_list):
@@ -224,7 +225,7 @@ def plotly_pie(stock_list, percent_list):
     
     fig.update_traces(textfont_size=17, marker=dict( line=dict(color='white', width=1)))
     fig.update_layout(font = dict(color = "white"))
-    
+    fig.update_traces(hovertemplate="%{label}=%{value:.0%}<extra></extra>")
 
     return fig
     
@@ -280,6 +281,9 @@ def scatter_plot(results_list):
                             #width = 530, height = 350
                             )
     #fig.update_layout(legend = {"y": -.38})
+    fig.update_traces(
+                hovertemplate="Annual Risk = %{x:.0}%<br>Annual Return = %{y:.0}%"
+    )
     
     return fig
 
