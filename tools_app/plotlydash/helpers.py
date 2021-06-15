@@ -207,8 +207,8 @@ def line_chart(results_list):
         type = 'log',
         dtick = 1,
         nticks = 20
-
     )
+    fig.update_yaxes(tickvals=[100, 200, 400, 800])
     # fig.update_layout(
     #     legend = {
     #         "xanchor": "left",

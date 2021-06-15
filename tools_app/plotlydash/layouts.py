@@ -1182,8 +1182,8 @@ def Inputs():
                         dbc.Popover(
                             children = [
                             dbc.PopoverHeader("Rebalance Threshold", style = {"color": "black"}),
-                            dbc.PopoverBody("If given a rebalance threshold, a portfolio rebalance will occur whenever any asset increases by x%."),
-                            dbc.PopoverBody("Ex. Bitcoin has a 5% allocation in your portfolio with a 5% threshold. If bitcoin ever becomes 10% or over of the portfolio, a rebalance will occur."),
+                            dbc.PopoverBody("This sets a constraint on the total allocation allowed to any one ticker. If the % an asset makes up within the broader portfolio increases or decreases by more than the designated rebalance threshold amount (X%), the portfolio will automatically rebalance to reach its target allocation for the asset."),
+                            dbc.PopoverBody("Ex: BTC has a 5% allocation within your portfolio, with a 5% rebalance threshold. If BTC becomes 10% or more of the overall portfolio, it will trigger a rebalance."),
                             ],
                             id = "pop_rebal",
                             target = "Rebalance",
@@ -1212,8 +1212,6 @@ def Inputs():
 
     return inputs_
 
-
-
 def DisplayPie():
     pie = dbc.Card([
         dbc.CardHeader(children= html.H3("Portfolio Allocation"), style = {"font": "Roboto", "color": onramp_colors["gray"]}),
@@ -1222,7 +1220,7 @@ def DisplayPie():
             dcc.Loading( id = "loading_pie", children=
             dcc.Graph(
                 id = "pie_chart_c",
-                style = {"responsive": True,  "width": "95%", "height": "40vh"}
+                style = {"responsive": True,  "width": "100%", "height": 350}
             )
             )
         ]),
@@ -1237,7 +1235,7 @@ def DisplayLineChart():
             dcc.Loading(id = "loading_line", children=
             dcc.Graph(
                 id = "line_chart_c",
-                style= {"responsive": True,  "width": "95%", "height": "40vh"}
+                style= {"responsive": True, "height": 350}
             ))
         ]), 
     ], className= "text-center mb-2", style= {"max-width" : "100%", "margin": "auto", "height": "28rem"}, color= onramp_colors["dark_blue"], inverse = True)
@@ -1251,7 +1249,7 @@ def DisplayScatter():
             dcc.Loading(id = "loading-scatter", children=
             dcc.Graph(
                 id = "scatter_plot_c",
-                style= {"responsive": True, "height": "43vh"}
+                style= {"responsive": True, "height": 350}
             )
             )
         ]),  
@@ -1316,7 +1314,7 @@ custom_page = dbc.Container([
     
     get_navbar('custom'),
 
-    #get_emptyrow(),
+    get_emptyrow(),
     #get_emptyrow(),
     #Title 
     dbc.Row(
@@ -1477,8 +1475,8 @@ def Inputs():
                         dbc.Popover(
                             children = [
                             dbc.PopoverHeader("Optimization Types", style = {"color": "black"}),
-                            dbc.PopoverBody("Mean Variance: This type utilizes the Efficient Frontier approach of maximizing returns for each unit of risk"),
-                            dbc.PopoverBody("Equal Risk Contribution: This gives equal risk of each asset"),
+                            dbc.PopoverBody("Mean Variance: Using the Efficient Frontier theory, MVM allows for the neutralization of asset specific (unsystematic) risk by optimizing for maximum return given existing correlation values and sharpe ratios of individual assets"),
+                            dbc.PopoverBody("Equal Risk Contribution: Optimizes for maximum return by assigning equal risk to each asset "),
                             dbc.PopoverBody("Inverse Volatility: Gives the inverse of the volatility for each asset"),
                             ],
                             id = "pop_opti",
@@ -1507,7 +1505,7 @@ def Inputs():
                         dbc.Popover(
                             children = [
                             dbc.PopoverHeader("Rebalance Frequency", style = {"color": "black"}),
-                            dbc.PopoverBody("Use this to select the frequency that the data is rebalanced for during optimization"),
+                            dbc.PopoverBody("Desired interval at which a rebalance to optimal portfolio allocation occurs."),
                             ],
                             id = "pop_freq",
                             target = "Frequency_sel",
@@ -1529,7 +1527,7 @@ def Inputs():
                         dbc.Popover(
                             children = [
                             dbc.PopoverHeader("Maximum Crypto Allocation", style = {"color": "black"}),
-                            dbc.PopoverBody("Although the optimizer may reccomend a high crypto allocation, we understand that is not viable for most people. Use this box to limit the amount of crypto in the final optimization"),
+                            dbc.PopoverBody("Allows the advisor to place a Maximum on the percentage of crypto allocated in the portfolio. Determined allocation could be lower than this number, but will not exceed it"),
                             ],
                             id = "pop_max",
                             target = "crypto_alloc",
@@ -1569,7 +1567,7 @@ def DisplayPie():
             dcc.Loading( id = "loading_pie_o", children=
             dcc.Graph(
                 id = "pie_chart_o",
-                style = {"responsive": True, "height": "37vh"}
+                style = {"responsive": True, "height": 300}
             )
             )
         ]),
@@ -1584,7 +1582,7 @@ def DisplayLineChart():
             dcc.Loading(id = "loading_line", children=
             dcc.Graph(
                 id = "line_chart_o",
-                style= {"height": "36vh"}
+                style= {"height": 300}
             ))
         ]), 
     ], className= "text-center mb-2", style= {"max-width" : "100%", "margin": "auto", "height": "25rem"}, color= onramp_colors["dark_blue"], inverse = True)
@@ -1598,7 +1596,7 @@ def DisplayScatter():
             dcc.Loading(id = "loading-scatter", children=
             dcc.Graph(
                 id = "scatter_plot_o",
-                style= {"responsive": True, "height": "36vh"}
+                style= {"responsive": True, "height": 300}
             )
             )
         ]),  
@@ -1655,7 +1653,7 @@ optimizer_page = dbc.Container([
     
     get_navbar('optimize'),
 
-    #get_emptyrow(),
+    get_emptyrow(),
     #get_emptyrow(),
     #Title 
     dbc.Row(
@@ -1665,7 +1663,9 @@ optimizer_page = dbc.Container([
                 dbc.CardBody([
                     html.H1(children="Portfolio Optimizer Dashboard", style = {"color": onramp_colors["white"]}), 
                     
-                    html.P(children= "Use the following tool to build hypothetical portfolios of equities, ETFs, and various Cryptoassets.  Analyze the impact of cryptoassets modeled in a traditional portfolio allocation. Over time we will enable advisors to create custom reports for clients based on the output.", 
+                    html.P(children= "Determines favorable asset allocation of a portfolio based on preferred optimization method, rebalancing frequency, and (if desired) crypto allocation constraints. ", 
+                            style = {"fontSize": "vmin", "color": onramp_colors["white"]}),
+                    html.P(children= "Provides strategic portfolio insights via: backtested performance visualization, risk and return chart, performance statistics, and historical breakdown of monthly returns.", 
                             style = {"fontSize": "vmin", "color": onramp_colors["white"]}),
                 ]),
             ],className="text-center mb-2", color= onramp_colors["dark_blue"], inverse= True,), 

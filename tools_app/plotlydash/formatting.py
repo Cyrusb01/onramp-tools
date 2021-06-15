@@ -88,10 +88,10 @@ onramp_legend = {
 }  # Legend will be on the bottom middle
 
 onramp_margins = {
-    "l": 40,
-    "r": 20,
-    "t": 10,
-    "b": 120,
+    "l": 0,
+    "r": 0,
+    "t": 0,
+    "b": 0,
 }  # Set top margin to in case there is a legend
 
 
@@ -123,6 +123,13 @@ onramp_legend_dashboard = {
     "font": {"size": 17, "color": onramp_colors["gray"]},
 }  # Legend will be on the bottom middle
 
+onramp_margins_dashboard = {
+    "l": 40,
+    "r": 0,
+    "t": 0,
+    "b": 40,
+}  # Set top margin to in case there is a legend
+
 onramp_layout_dashboard = go.Layout(
     colorway= [onramp_colors["btc"], onramp_colors["white"], onramp_colors["cyan"], '#B0B6BD'],
     font = {'family' : onramp_font_family},
@@ -134,7 +141,7 @@ onramp_layout_dashboard = go.Layout(
     yaxis=onramp_yaxis,
     #height=200,
     legend=onramp_legend_dashboard,
-    margin=onramp_margins,
+    margin=onramp_margins_dashboard,
 )
 
 onramp_template_dashboard = dict(layout=go.Layout(onramp_layout_dashboard))
