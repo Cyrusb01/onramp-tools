@@ -9,7 +9,7 @@ def init_dashboard(server):
     """Create a Plotly Dash dashboard."""
     dash_app = dash.Dash(
         server=server,
-        routes_pathname_prefix='/apps/',
+        routes_pathname_prefix='/',
     )
 
     # Create Dash Layout
