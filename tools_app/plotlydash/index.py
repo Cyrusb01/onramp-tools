@@ -1,5 +1,5 @@
 import dash
-from .layouts import dashboard_page, vol_page, heatmap_page, heatmap_timeline_page, btc_vol_page, custom_page, optimizer_page
+from .layouts import dashboard_page, vol_page, heatmap_page, heatmap_timeline_page, btc_vol_page, custom_page, optimizer_page, index_page
 import dash_core_components as dcc
 import dash_html_components as html
 from .callbacks import init_callbacks
@@ -33,12 +33,14 @@ def init_dashboard(server):
             return heatmap_page
         elif pathname == "/apps/correlation-timeline":
             return heatmap_timeline_page
-        elif pathname == "/apps/bitcoin-volatility":
+        elif pathname == "/apps/annualized-volatility":
             return btc_vol_page
         elif pathname == "/apps/custom-dashboard":
             return custom_page
         elif pathname == "/apps/portfolio-optimizer":
             return optimizer_page
+        elif pathname == "/apps/crypto-index":
+            return index_page
         else:
             return dashboard_page  # This is the "home page"
 
