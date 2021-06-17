@@ -145,6 +145,7 @@ def init_callbacks(dash_app):
     results_spy = returns[1]
     results_agg = returns[2]
 
+   
 
     ####################################################################################################
     # DASHBOARD PAGE
@@ -221,7 +222,7 @@ def init_callbacks(dash_app):
                     "yanchor": "top",
                 },
                 legend=dict(
-                    orientation="h", yanchor="bottom", y=-0.2, xanchor="left", x=0.30
+                    orientation="h", yanchor="bottom", y=-0.2, xanchor="left", x=0.10
                 ),
             )
             fig.update_layout(
@@ -229,7 +230,7 @@ def init_callbacks(dash_app):
             )
             fig.update_traces(textfont_size=17, marker=dict( line=dict(color='white', width=1)))
             fig.update_layout(titlefont=dict(size=24, color= onramp_colors["gray"]))
-            fig.update_layout(margin=dict(l=10, r=20, t=40, b=0))
+            fig.update_layout(margin=dict(l=20, r=0, t=40, b=0))
 
             return fig
 
@@ -632,6 +633,122 @@ def init_callbacks(dash_app):
             return graph_volatility(df_vol, pairs_crypto, c)
         if value == "AC":
             return graph_volatility(df_mixed, pairs_mixed, c)
+    
+    ####################################################################################################
+    # BITCOIN VOLATILITY CHART PAGE
+    ####################################################################################################
+
+    @dash_app.callback(
+        dash.dependencies.Output("btc_vol_chart", "figure"),
+        dash.dependencies.Output("btc_vol_chart_t", "figure"),
+        [dash.dependencies.Input("dropdown_btc_vol", "value")],
+    )
+    def update_vol(value):
+        
+        
+        df = calc_volatility_btc_vol([f"{value}-USDT"]) #Used for Crypto Vol Chart
+
+        #print(df)
+        df_btc = df[[f'{value}_vol_30', f'{value}_vol_60', f'{value}_vol_7', f'{value}_vol_14']].copy() #Annualized bitcoin vol chart
+
+        df_btc.columns = ['Ann. 30D Volatility', 'Ann. 60D Volatility', 'Ann. 7D Volatility', 'Avg30DVolatility']
+
+        for col in df_btc.columns:
+            df_btc[col] = df_btc[col].map(lambda element: element/100)
+
+
+        avg_7 = df_btc["Ann. 7D Volatility"].mean()
+        avg_30 = df_btc["Ann. 30D Volatility"].mean()
+        avg_60 = df_btc["Ann. 60D Volatility"].mean()
+
+        df_btc = df_btc.assign(Avg30DVolatility = avg_30)
+
+
+        def graph_btc_vol(df):
+            fig = go.Figure()
+            fig.add_trace(go.Scatter( x = df.index, y = df['Ann. 30D Volatility'], name = 'Ann. 30D Volatility', line = dict(color = "#00EEAD", width = 2, dash = 'solid')))
+            fig.add_trace(go.Scatter( x = df.index, y = df['Ann. 60D Volatility'], name = 'Ann. 60D Volatility', line = dict(color = "white", width = 2, dash = 'solid')))
+            fig.add_trace(go.Scatter( x = df.index, y = df['Ann. 7D Volatility'], name = 'Ann. 7D Volatility', line = dict(color = "#B0B6BD", width = 2, dash = 'dot')))
+            fig.add_trace(go.Scatter( x = df.index, y = df['Avg30DVolatility'], name = 'Avg. 30D Volatility', line = dict(color = "white", width = 2, dash = 'dash')))
+            fig.update_xaxes(showgrid = False)
+            fig.update_yaxes(showgrid=False) 
+            fig.update_layout(yaxis_tickformat="%")
+            fig.update_layout(
+                legend=dict(
+                    orientation="h", yanchor="top", xanchor="center", y = 1.1, x = .5, font = {"size": 17}
+                    
+                ),
+                font=dict(family="Roboto", color="white"),
+                title={
+                    "text": f"<b>Annualized 30D & 60D Volatility - {value}<b>",
+                    "y": 1,
+                    "x": 0.5,
+                    "xanchor": "center",
+                    "yanchor": "top",
+                },
+                xaxis=dict(
+                        title="Date",
+                        ticks="inside",
+                        ticklen=6,
+                        tickwidth=3,
+                        rangeselector=dict(
+                            font = dict(color = 'black'),
+                            buttons=list(
+                                [
+                                    dict(
+                                        count=3, label="3m", step="month", stepmode="backward"
+                                    ),
+                                    dict(count=1, label="YTD", step="year", stepmode="todate"),
+                                    dict(count=1, label="1y", step="year", stepmode="backward"),
+                                    dict(step="all"),
+                                ]
+                            )
+                        ),
+                        type="date",
+                        tickcolor="#53585f",
+                    ),
+            )
+            fig.update_layout(
+                {
+                    "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
+                    "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                }
+            )
+            #fig.update_xaxes(ticks = 'outside', tickwidth=2, tickcolor='white', ticklen=10)
+            fig.update_xaxes(tickfont = {'size': 14})
+            fig.update_yaxes(tickfont = {'size': 14})
+            fig.update_yaxes(side="left", nticks=8)
+            fig.update_layout(titlefont=dict(size=30, color="white", family="Roboto"))
+
+            return fig
+
+        def btc_vol_table(a7, a30, a60, df_btc):
+            labels = ['<b>Volatility<b>', '<b>Average<b>', '<b>Current<b>']
+            fig = go.Figure(data=[go.Table(
+                                        header=dict(values= labels,
+                                                    line_color= 'white',
+                                                    fill_color= '#b0b6bd',
+                                                    align=['center','center', 'center'],
+                                                    height = 50,
+                                                    font=dict(color='black', size=30, family = "roboto")),
+                                        cells=dict(values=[['Ann. 7D Volatility', 'Ann. 30D Volatility', 'Ann. 60D Volatility'], [str(round(a7*100, 2))+'%', str(round(a30*100, 2))+'%', str(round(a60*100, 2))+'%'], [str(round(df_btc['Ann. 7D Volatility'].iloc[-1]*100, 2))+'%', str(round(df_btc['Ann. 30D Volatility'].iloc[-1]*100, 2))+'%', str(round(df_btc['Ann. 60D Volatility'].iloc[-1]*100, 2))+'%']],
+                                                    line_color = 'white',
+                                                    height = 40,
+                                                    font = dict(color = 'white', size = 20, family = "roboto"),
+                                                    fill_color = '#131c4f' )) ])
+            fig.update_layout(margin = dict(l=1, r=0, t=0, b=0))
+            fig.update_layout(
+                {
+                    "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
+                    "paper_bgcolor": "rgba(0, 0, 0, 0)",
+                }
+            )
+            return fig
+
+        btc_vol_table = btc_vol_table(avg_7, avg_30, avg_60, df_btc)
+        btc_vol_fig = graph_btc_vol(df_btc)
+
+        return btc_vol_fig, btc_vol_table
 
     ####################################################################################################
     # HEATMAP CHART PAGE
@@ -1200,4 +1317,24 @@ def init_callbacks(dash_app):
 
         return fig_pie, fig_line, fig_opt_table, fig_scat, fig_stats, fig_month
 
-    ##############################################################################################################################################################
+    
+    ####################################################################################################
+    # INDEX PAGE
+    ####################################################################################################
+
+    # @dash_app.callback(
+
+    #     [Output('pie_chart_i', 'figure'),
+    #     Output('line_chart_i', 'figure'),
+    #     Output('opto_table', 'figure'),
+    #     Output('scatter_plot_i', 'figure'),
+    #     Output('stats_table_i', 'figure'),
+    #     Output('month_table_i', 'figure'),
+    #     ],
+
+    #     Input("pie_sel", 'value'),
+
+    # )
+
+    # def update_graphs(pie_choice):
+
