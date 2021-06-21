@@ -14,9 +14,19 @@ import urllib.parse as urlparse
 from .formatting import onramp_colors, onramp_template, onramp_template_dashboard, custom_scale
 from .helpers import *
 from .bt_algos import RebalanceAssetThreshold
+from .db_to_csv_transformer import eager_fetch_all_crypto_data
+
+
+
 
 
 def init_callbacks(dash_app):
+
+    
+
+    # btc = get_coin('bitcoin')
+    # df_btc = pd.DataFrame(btc)
+    # print(df_btc)
 
     url = urlparse.urlparse('redis://default:mUtpOEwJc2F8tHYOGxF9JGvnIwHY3unu@redis-16351.c263.us-east-1-2.ec2.cloud.redislabs.com:16351')
     r = DirectRedis(host=url.hostname, port=url.port, password=url.password)
@@ -95,6 +105,19 @@ def init_callbacks(dash_app):
         "BNB-USDT",
         "ETH-USDT",
     ]
+    pairs_crypto_db = [
+        "bitcoin",
+        "bitcoin-cash",
+        "tron",
+        "chainlink",
+        "stellar",
+        "eos",
+        "cardano",
+        "litecoin",
+        "neo",
+        "binance-coin",
+        "ethereum",
+    ]
 
     pairs_mixed = [
         "S&P 500",
@@ -120,7 +143,8 @@ def init_callbacks(dash_app):
         df_mixed.index > datetime.datetime(2020, 1, 15)
     ]  # make it so we only have 2020 data
 
-    df_vol = calc_volatility(pairs_crypto) #Used for Crypto Vol Chart 
+    df_vol = calc_volatility(pairs_crypto_db) #Used for Crypto Vol Chart 
+    df_vol.columns = df_vol.columns.str.capitalize()
 
     today = datetime.datetime.now(tz=pytz.utc).date()
     xd = today - datetime.timedelta(days=30) 
@@ -130,7 +154,8 @@ def init_callbacks(dash_app):
 
     ############################################## HEATMAP/TIMELINE ##########################################
 
-    corr_df = create_corr(pairs_crypto)
+    corr_df = create_corr(pairs_crypto_db)
+    #corr_df.columns = corr_df.columns.str.capitalize()
 
     corr_df_new = create_corr_new(pairs_mixed)
 
@@ -163,7 +188,7 @@ def init_callbacks(dash_app):
     )
     def update_graphs(value):
         # print(value)
-        # ------------------------------------------------------------------------------Pie Chart ---------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------Pie Chart --------------------------------------------------------------------------
         value_dict = {
             0: 1,
             0.5: 2,
@@ -500,6 +525,7 @@ def init_callbacks(dash_app):
                 tickprefix="                 ",
             )
             vols = [14, 30, 90]
+
             colors = 6 * [
                 "grey",
                 "#033F63",
@@ -630,7 +656,7 @@ def init_callbacks(dash_app):
             return fig
 
         if value == "CC":
-            return graph_volatility(df_vol, pairs_crypto, c)
+            return graph_volatility(df_vol, pairs_crypto_db, c)
         if value == "AC":
             return graph_volatility(df_mixed, pairs_mixed, c)
     
@@ -645,11 +671,25 @@ def init_callbacks(dash_app):
     )
     def update_vol(value):
         
-        
-        df = calc_volatility_btc_vol([f"{value}-USDT"]) #Used for Crypto Vol Chart
+        pairs_crypto_db_dict = {
+        "BTC"   :"bitcoin",
+        "BCHABC":"bitcoin-cash",
+        "TRX"   :"tron",
+        "LINK"  :"chainlink",
+        "XLM"   :"stellar",
+        "EOS"   :"eos",
+        "ADA"   :"cardano",
+        "LTC"   :"litecoin",
+        "NEO"   :"neo",
+        "BNB"   :"binance-coin",
+        "ETH"   :"ethereum",
+        }
 
-        #print(df)
-        df_btc = df[[f'{value}_vol_30', f'{value}_vol_60', f'{value}_vol_7', f'{value}_vol_14']].copy() #Annualized bitcoin vol chart
+        name = pairs_crypto_db_dict[value]
+        df = calc_volatility_annualized([name]) #Used for Crypto Vol Chart
+        print(df)
+        print(name)
+        df_btc = df[[f'{name}_vol_30', f'{name}_vol_60', f'{name}_vol_7', f'{name}_vol_14']].copy() #Annualized bitcoin vol chart
 
         df_btc.columns = ['Ann. 30D Volatility', 'Ann. 60D Volatility', 'Ann. 7D Volatility', 'Avg30DVolatility']
 
@@ -759,6 +799,7 @@ def init_callbacks(dash_app):
     )
     def update_heatmap(value):
         def graph_heatmap(df, date):
+
             corr_mtx = df.loc[date].values
             text_info = np.round(corr_mtx, decimals=5).astype(str)
 
@@ -819,6 +860,7 @@ def init_callbacks(dash_app):
             return fig
 
         if value == "CC":
+            corr_df.columns = corr_df.columns.str.capitalize()
             return graph_heatmap(corr_df, c)
         if value == "AC":
             return graph_heatmap(corr_df_new, c)
@@ -832,6 +874,7 @@ def init_callbacks(dash_app):
     )
     def update_timeline(value):
         def graph_timeline(corr_df, xd):
+            
             _font = dict(family="Roboto", color = 'white')
             source = "Binance"
             axis_dict = dict(

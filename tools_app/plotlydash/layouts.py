@@ -17,7 +17,7 @@ from direct_redis import DirectRedis
 import urllib.parse as urlparse
 from datetime import timedelta
 from .formatting import onramp_colors, externalgraph_rowstyling, externalgraph_colstyling, recapdiv
-from .helpers import calc_volatility_btc_vol, line_chart, scatter_plot
+from .helpers import line_chart, scatter_plot
 
 url = urlparse.urlparse('redis://default:mUtpOEwJc2F8tHYOGxF9JGvnIwHY3unu@redis-16351.c263.us-east-1-2.ec2.cloud.redislabs.com:16351')
 r = DirectRedis(host=url.hostname, port=url.port, password=url.password)
@@ -720,7 +720,7 @@ btc_vol_page = html.Div(
                                                 {"label": "Bitcoin", "value": "BTC",},
                                                 {"label": "Bitcoin Cash ABC", "value": "BCHABC",},
                                                 {"label": "Tron", "value": "TRX",},
-                                                {"label": "Iota", "value": "IOTA",},
+                                                {"label": "Chainlink", "value": "LINK",},
                                                 {"label": "Stellar Lumen", "value": "XLM",},
                                                 {"label": "Eos", "value": "EOS",},
                                                 {"label": "Cardano", "value": "ADA",},
@@ -728,7 +728,6 @@ btc_vol_page = html.Div(
                                                 {"label": "Neo", "value": "NEO",},
                                                 {"label": "Binance Coin", "value": "BNB",},
                                                 {"label": "Ethereum", "value": "ETH",},
-                                                
                                             ],
                                             value="BTC",
                                         ),

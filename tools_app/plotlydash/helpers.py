@@ -3,7 +3,11 @@ import bt
 import plotly.express as px
 import plotly.graph_objects as go
 from .formatting import onramp_colors, onramp_template, onramp_template_dashboard
+from .db_to_csv_transformer import eager_fetch_all_crypto_data
 
+get_coin = eager_fetch_all_crypto_data()
+
+#Gets data from csvs to use in functions 
 def get_coin_data(symbol):
     df = pd.read_csv(f"datafiles/{symbol}_data.csv")
     res = df[
@@ -11,10 +15,13 @@ def get_coin_data(symbol):
     ].to_dict(orient="list")
     return res
 
+# "New refers to the Mixed Asset Graphs "
 def get_coin_data_new(symbol):
     df = pd.read_csv("datafiles/Multi_Asset_data.csv", usecols=["Timestamp", symbol])
     res = df.to_dict(orient="list")
     return res
+
+
 
 def volatility(price, period_value, data_interval):
     """
@@ -50,39 +57,40 @@ def volatility(price, period_value, data_interval):
 
 def calc_volatility(pairs):
     """
-    Get Graph For Each Coin You Want
+    Calculate Volitility For Graphs CRYPTOS
     """
     # create visuals
 
     df_all = dict()
     for sp in pairs:
         # calculate vol for each coin and graph
-        tmp = pd.DataFrame(get_coin_data(sp))
+        tmp = pd.DataFrame(get_coin(sp))
         tmp = tmp[["price_close", "timestamp"]]
         tmp.timestamp = pd.to_datetime(tmp.timestamp, unit="s")
         tmp.set_index("timestamp", inplace=True)
         for t in [14, 30, 90]:
-            df_all[f'{sp.split("-",1)[0]}_vol_{t}'] = volatility(
+            df_all[f'{sp}_vol_{t}'] = volatility(
                 tmp.price_close, t, data_interval= "1D"
             )
 
     return pd.DataFrame(df_all).dropna(how="all")
 
-def calc_volatility_btc_vol(pairs):
+def calc_volatility_annualized(pairs):
     """
-    Get Graph For Each Coin You Want
+    Calculate Volatility for the ANNUALIZED VOLATILITY
+    this function gives more volatility ranges (7, 60)
     """
     # create visuals
 
     df_all = dict()
     for sp in pairs:
         # calculate vol for each coin and graph
-        tmp = pd.DataFrame(get_coin_data(sp))
+        tmp = pd.DataFrame(get_coin(sp))
         tmp = tmp[["price_close", "timestamp"]]
         tmp.timestamp = pd.to_datetime(tmp.timestamp, unit="s")
         tmp.set_index("timestamp", inplace=True)
         for t in [14, 30, 90, 7, 60]:
-            df_all[f'{sp.split("-",1)[0]}_vol_{t}'] = volatility(
+            df_all[f'{sp}_vol_{t}'] = volatility(
                 tmp.price_close, t, data_interval= "1D"
             )
 
@@ -90,7 +98,7 @@ def calc_volatility_btc_vol(pairs):
 
 def calc_volatility_new(pairs):
     """
-    Get Graph For Each Coin You Want
+    Calculate Volitility For Graphs MIXED ASSET CLASSES 
     """
     # create visuals
 
@@ -108,10 +116,14 @@ def calc_volatility_new(pairs):
 
     return pd.DataFrame(df_all).dropna(how="all")
 
+
+
+
+
 def create_corr(pairs):
     vals = dict()
     for sp in pairs:
-        data = get_coin_data(sp)
+        data = get_coin(sp)
         if len(data) < 6:  # bad data
             print(sp, " ", len(data))
             continue
@@ -122,7 +134,7 @@ def create_corr(pairs):
     df_ = pd.DataFrame(vals)
     df_.index = pd.to_datetime(df_.index, unit="s")
     df_ = df_.pct_change(1).fillna(0)
-    df_.columns = [col.split("-", 1)[0] for col in df_.columns]
+    df_.columns = [col for col in df_.columns]
     df_ = df_.round(3).rolling(180).corr().dropna(how="all")
 
     return df_
