@@ -1,8 +1,10 @@
 
 import plotly.graph_objs as go
+from PIL import Image
 
-
-
+img = Image.open("tools_app/assets/onramp-logo-small.png")
+# with Image.open("tools_app/assets/onramp-logo-small.png") as im:
+#     im.show()
 ####################################################################################################
 # 000 - FORMATTING INFO
 ####################################################################################################

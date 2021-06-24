@@ -41,10 +41,11 @@ def eager_fetch_all_stock_data():
         df_final = pd.DataFrame()
         for stock in stocks:
             df = dict_of_frames[stock]
-            df.columns = ['trash', df.iloc[3][3], 'Date', 'symbol']
-            df = df.drop(columns = ['trash', 'symbol'] )
+            df = df.rename(columns={'date': 'Date', 'close': df['symbol'].iloc[0]})
+            df = df.drop(columns = ['_sa_instance_state', 'symbol'] )
             df = df.set_index('Date')
             df_final = df_final.join(df, how = 'outer')
+            
         return df_final 
 
     return get_stock

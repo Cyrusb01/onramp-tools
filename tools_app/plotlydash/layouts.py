@@ -9,6 +9,7 @@ import dash_html_components as html
 from dash_bootstrap_components._components.CardBody import CardBody
 from dash_bootstrap_components._components.Row import Row
 import dash_bootstrap_components as dbc
+import dash_daq as daq
 import plotly.graph_objs as go
 import pandas as pd
 import numpy as np 
@@ -387,7 +388,6 @@ def get_emptyrow(h="45px"):
     )
 
     return emptyrow
-
 
 ####################################################################################################
 # 001 - Portfilio Modeling
@@ -1160,8 +1160,30 @@ def Inputs():
 
                 #Inputs 5 
                 dbc.Row([
-                    dbc.Col(
-                    width={'size':4}, className= "mb-4" #Empty Col for Rebalance 
+                    dbc.Col([
+                        dbc.FormText("Rebalance Freq"),
+                        dbc.Select(
+                            id = "Frequency_sel",
+                            options=[
+                                {"label": "Daily Rebalance", "value": "Daily"},
+                                {"label": "Monthly Rebalance", "value": "Month"},
+                                {"label": "Quarterly Rebalance", "value": "Quart"},
+                                {"label": "Yearly Rebalance", "value": "Year"},
+                                {"label": "Compare All", "value": "Compare"},
+                            ],
+                            value = "Quart",
+                            style = {"width" : "100%", "height": "52%"}
+                        ),
+                        dbc.Popover(
+                            children = [
+                            dbc.PopoverHeader("Rebalance Frequency", style = {"color": "black"}),
+                            dbc.PopoverBody("Desired interval at which a rebalance to optimal portfolio allocation occurs."),
+                            ],
+                            id = "pop_freq",
+                            target = "Frequency_sel",
+                            trigger = "hover"
+                        ),
+                    ], width={'size':4}, className= "mb-2" #Empty Col for Rebalance 
                     ), 
 
                     dbc.Col([
@@ -1211,6 +1233,7 @@ def Inputs():
 
 def DisplayPie():
     pie = dbc.Card([
+        
         dbc.CardHeader(children= html.H3("Portfolio Allocation"), style = {"font": "Roboto", "color": onramp_colors["gray"]}),
         dbc.CardBody([
             
@@ -1221,7 +1244,8 @@ def DisplayPie():
             )
             )
         ]),
-    ],  className= "text-center mb-2 mr-2", style= {"height": "28rem"}, color= onramp_colors["dark_blue"], inverse = True)
+        
+    ],  id = 'pie_card', className= "text-center mb-2 mr-2", style= {"height": "28rem"}, color= onramp_colors["dark_blue"], inverse = True)
 
     return pie
            

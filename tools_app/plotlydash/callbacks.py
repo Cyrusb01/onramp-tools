@@ -20,6 +20,9 @@ from .db_to_csv_transformer import eager_fetch_all_stock_data
 
 
 
+
+
+
 def init_callbacks(dash_app):
 
     
@@ -1056,10 +1059,11 @@ def init_callbacks(dash_app):
         State('Allocation3', 'value'),
         State('Ticker4', 'value'),
         State('Allocation4', 'value'),
-        State('Rebalance', 'value')
+        State('Frequency_sel', 'value'),
+        State('Rebalance', 'value'),
         
     )
-    def update_graph(num_click, stock_choice_1, alloc1, stock_choice_2, alloc2, stock_choice_3, alloc3, stock_choice_4, alloc4, rebalance = 1.2):
+    def update_graph(num_click, stock_choice_1, alloc1, stock_choice_2, alloc2, stock_choice_3, alloc3, stock_choice_4, alloc4,  freq_sel, rebalance = 1.2,):
         start = time.time()
         ####################################################### PIE CHART ##########################################################################################
         stock_list_pie = [stock_choice_1, stock_choice_2, stock_choice_3, stock_choice_4]
@@ -1100,6 +1104,7 @@ def init_callbacks(dash_app):
                 if '-' in ticker:
                     no_dash = ticker.replace('-', '')
                 data_x = get_dashboard_data([no_dash])
+                #print(data_x)
                 print("Got", ticker)
             except:
                 print("Could not find", ticker, "in the DB.")
@@ -1107,7 +1112,8 @@ def init_callbacks(dash_app):
             data = data.join(data_x, how = 'outer')
         
         data = data.dropna()
-        data.index = pd.to_datetime(data.index)
+        data.index = pd.to_datetime(data.index) 
+        print(data)
         data_e = time.time()
         print("Finished Data:", data_e - data_s)
 
@@ -1125,7 +1131,18 @@ def init_callbacks(dash_app):
         if(rebalance == None or rebalance == ""):
             rebalance = 120
         rebalance = float(rebalance)/100
-        strategy_ = bt.Strategy("Custom Strategy", 
+
+        if freq_sel == 'Daily':
+            strategy_ = bt.Strategy("Custom Strategy D", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunDaily(),
+                                bt.algos.Rebalance()]) #Creating strategy
+        if freq_sel == 'Month':
+            strategy_ = bt.Strategy("Custom Strategy M", 
                                 [ 
                                 bt.algos.RunDaily(),
                                 bt.algos.SelectAll(), 
@@ -1133,19 +1150,92 @@ def init_callbacks(dash_app):
                                 RebalanceAssetThreshold(threshold = rebalance),
                                 bt.algos.RunMonthly(),
                                 bt.algos.Rebalance()]) #Creating strategy
+        if freq_sel == 'Quart' or freq_sel == 'Compare':
+            strategy_ = bt.Strategy("Custom Strategy Q", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunQuarterly(),
+                                bt.algos.Rebalance()]) #Creating strategy
+        if freq_sel == 'Year':
+            strategy_ = bt.Strategy("Custom Strategy Y", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunYearly(),
+                                bt.algos.Rebalance()]) #Creating strategy
 
         test = bt.Backtest(strategy_, data)
         results = bt.run(test)
         
         results_list = [results, results_control, results_spy, results_agg]
-        
+        results_list_t = results_list
+
         data_et = time.time()
         print("Finished Strategy:", data_et - data_st)
         ################################################### LINE CHART ########################################################################################################
-        fig_line = line_chart(results_list)
+        
+        if freq_sel == 'Compare':
+            strategy_d = bt.Strategy("Daily Rebalance", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunDaily(),
+                                bt.algos.Rebalance()]) #Creating strategy
+            
+            strategy_m = bt.Strategy("Monthly Rebalance", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunMonthly(),
+                                bt.algos.Rebalance()]) #Creating strategy
+            
+            strategy_q = bt.Strategy("Quarterly Rebalance", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunQuarterly(),
+                                bt.algos.Rebalance()]) #Creating strategy
+            
+            strategy_y = bt.Strategy("Yearly Rebalance", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunYearly(),
+                                bt.algos.Rebalance()]) #Creating strategy
+            
+            test = bt.Backtest(strategy_d, data)
+            results_d = bt.run(test)
+
+            test = bt.Backtest(strategy_m, data)
+            results_m = bt.run(test)
+
+            test = bt.Backtest(strategy_q, data)
+            results_q = bt.run(test)
+
+            test = bt.Backtest(strategy_y, data)
+            results_y = bt.run(test)
+        
+            results_list_t = [results_d, results_m, results_q, results_y, results_control]
+            
+            
+    
+        fig_line = line_chart(results_list_t) #use t so we can do the compare all 
         fig_line.update_layout(template = onramp_template_dashboard) #legend in top left
 
-        fig_scat = scatter_plot(results_list)
+        fig_scat = scatter_plot(results_list_t)
         fig_scat.update_layout(template = onramp_template_dashboard) #legend in top left
 
         fig_stats = stats_table(results_list)

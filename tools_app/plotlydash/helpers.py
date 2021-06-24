@@ -4,6 +4,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from .formatting import onramp_colors, onramp_template, onramp_template_dashboard
 from .db_to_csv_transformer import eager_fetch_all_crypto_data
+from PIL import Image
+
 
 get_coin = eager_fetch_all_crypto_data()
 
@@ -221,13 +223,24 @@ def line_chart(results_list):
         nticks = 20
     )
     fig.update_yaxes(tickvals=[100, 200, 400, 800])
-    # fig.update_layout(
-    #     legend = {
-    #         "xanchor": "left",
-    #         "x": .2,
-    #     }  
-    # )
+   
     fig.update_traces(hovertemplate = "%{y}<br>%{x}<extra></extra>")
+    img = Image.open("tools_app/assets/onramp-logo-small.png")
+    fig.add_layout_image(
+    dict(
+        source=img,
+        xref="paper", yref="paper",
+        x=.8, 
+        y=.2,
+        sizex=0.7, 
+        sizey=0.7,
+        xanchor="right", 
+        yanchor="bottom",
+        opacity = .3,
+
+    )
+    )
+    #fig.update_layout(template="plotly_white")
     return fig
 
 def plotly_pie(stock_list, percent_list):
@@ -346,7 +359,7 @@ def short_stats_table(results_list):
     
     #adding new row of differences
     stats_combined['Difference'] = stats_combined.apply(lambda row: 
-                                        str(round(float(row.Your_Strategy.replace('%', ''))- float(row.Portfolio6040.replace('%', '')), 2)) + '%', axis = 1)  
+                                        str(round(float(row.Your_Strategy.replace('%', '').replace(',', ''))- float(row.Portfolio6040.replace('%', '').replace(',', '')), 2)) + '%', axis = 1)  
 
     text_color = []
     n = len(stats_combined)
