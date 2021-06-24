@@ -1413,7 +1413,7 @@ def Inputs():
                         dbc.Input(
                             id = "Ticker_o",
                             type= 'text',
-                            value = "spy,agg,tsla,msft",
+                            value = "SPY,AGG,GOOG,MSFT",
                             placeholder= "Enter Tickers",
                             debounce = True,
                             style = {"width" : "100%", "height": "62%"}
@@ -1426,7 +1426,7 @@ def Inputs():
                         dbc.Input(
                             id = "cTicker_o",
                             type= 'text',
-                            value = "btc-usd,eth-usd",
+                            value = "BTC-USD,ETH-USD",
                             placeholder= "Enter Cryptos",
                             debounce = True,
                             style = {"width" : "100%", "height": "62%"}

@@ -9,7 +9,7 @@ Base = declarative_base()
 class CloseData(Base):
     __tablename__ = 'close_data'
 
-    symbol = Column(String, primary_key=True)
+    symbol = Column(String, primary_key = True)
     close = Column(Float)
     date = Column(Date, primary_key=True)
 
@@ -21,7 +21,10 @@ class CloseData(Base):
 
     @staticmethod
     def get_multiple_histories(symbols: List[str], session: Session) -> List["CloseData"]:
-        symbol_joins = ",".join(symbols)
-        stmt = text("SELECT * FROM close_data where symbol in (:symbol_joins)")
+        symbols = [ticker.lower() for ticker in symbols]
+        symbols_tuple = tuple(symbols)
+        #symbol_joins = ",".join(symbols)
+        #print(symbol_joins)
+        stmt = text("SELECT * FROM close_data where symbol in {}".format(symbols_tuple))
         return session.query(CloseData).from_statement(stmt)\
-            .params(symbol_joins=symbol_joins).all()
+            .params(symbols_tuple=symbols_tuple).all()

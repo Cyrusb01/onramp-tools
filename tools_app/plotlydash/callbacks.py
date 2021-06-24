@@ -14,7 +14,7 @@ import urllib.parse as urlparse
 from .formatting import onramp_colors, onramp_template, onramp_template_dashboard, custom_scale
 from .helpers import *
 from .bt_algos import RebalanceAssetThreshold
-from .db_to_csv_transformer import eager_fetch_all_crypto_data
+from .db_to_csv_transformer import eager_fetch_all_stock_data
 
 
 
@@ -30,6 +30,18 @@ def init_callbacks(dash_app):
 
     url = urlparse.urlparse('redis://default:mUtpOEwJc2F8tHYOGxF9JGvnIwHY3unu@redis-16351.c263.us-east-1-2.ec2.cloud.redislabs.com:16351')
     r = DirectRedis(host=url.hostname, port=url.port, password=url.password)
+
+
+    get_dashboard_data = eager_fetch_all_stock_data()
+    # start = time.time()
+    # # try:
+    # #     print(get_dashboard_data(['amc']))
+    # # except:
+    # #     print(bt.get('amc'))
+    # print(get_dashboard_data(['goog']))
+    # print(get_dashboard_data(['msft']))
+    # end = time.time()
+    # print("Total Time: ", end-start)
 
 
     ####################################################################################################
@@ -1063,47 +1075,42 @@ def init_callbacks(dash_app):
         stock_choice_4 = stock_choice_4.lower()
         stock_list_pie = [stock_choice_1, stock_choice_2, stock_choice_3, stock_choice_4]
         
-        #stock_list = stock_choice_1 +',' + stock_choice_2 + ',' + stock_choice_3 + ',' + stock_choice_4
         
-        data_s = time.time()
-        #data = bt.get(stock_list, start = '2017-01-01')
-        data = pd.DataFrame()
-        #context = pa.default_serialization_context()
-        for ticker in stock_list_pie:
-            data_x = r.get(ticker)
-            if data_x is None:
-                print("Could not find", ticker, "in the cache.")
-                data_x = bt.get(ticker, start = '2017-01-01')
-                r.set(ticker, data_x)
-                r.expire(ticker, timedelta(seconds = 86400))
+        
+        
+        #-----------------OLD REDIS DATA FETCHING-------------------------------
+        # data = pd.DataFrame()
+        # for ticker in stock_list_pie:
+        #     data_x = r.get(ticker)
+        #     if data_x is None:
+        #         print("Could not find", ticker, "in the cache.")
+        #         data_x = bt.get(ticker, start = '2017-01-01')
+        #         r.set(ticker, data_x)
+        #         r.expire(ticker, timedelta(seconds = 86400))
 
+        #     data = data.join(data_x, how = 'outer')
+
+        #--------------NEW DATABSE DATA FETCHING 
+        data_s = time.time()
+        data = pd.DataFrame()
+        for ticker in stock_list_pie:
+            
+            try: 
+                no_dash = ticker
+                if '-' in ticker:
+                    no_dash = ticker.replace('-', '')
+                data_x = get_dashboard_data([no_dash])
+                print("Got", ticker)
+            except:
+                print("Could not find", ticker, "in the DB.")
+                data_x = bt.get(ticker, start = '2017-01-01')
             data = data.join(data_x, how = 'outer')
         
-
-
-
-
-        # data1 = r.get(stock_choice_1)
-        # context = pa.default_serialization_context()
-        # if data1 is None:
-        #     print("Could not find", stock_choice_1, "in the cache.")
-        #     data1 = bt.get(stock_choice_1, start = '2017-01-01')
-        #     r.set(stock_choice_1, context.serialize(data1).to_buffer().to_pybytes())
-
-        # data1 = bt.get(stock_choice_1, start = '2017-01-01')
-        # data2 = bt.get(stock_choice_2, start = '2017-01-01')
-        # data3 = bt.get(stock_choice_3, start = '2017-01-01')
-        # data4 = bt.get(stock_choice_4, start = '2017-01-01')
-        # data_2 = pd.DataFrame()
-        # data_2 = data_2.join(data1, how = 'outer')
-        # print(data_2)
-        # data = data1.join(data2, how='outer')
-        # data = data.join(data3, how='outer')
-        # data = data.join(data4, how='outer')
         data = data.dropna()
-        #print(data)
+        data.index = pd.to_datetime(data.index)
         data_e = time.time()
-        print("Finished Data", stock_choice_1, ":", data_e - data_s)
+        print("Finished Data:", data_e - data_s)
+
 
         #need the '-' in cryptos to get the data, but bt needs it gone to work
         data_st = time.time()
@@ -1133,7 +1140,7 @@ def init_callbacks(dash_app):
         results_list = [results, results_control, results_spy, results_agg]
         
         data_et = time.time()
-        print("Finished Strategy", stock_choice_1, ":", data_et - data_st)
+        print("Finished Strategy:", data_et - data_st)
         ################################################### LINE CHART ########################################################################################################
         fig_line = line_chart(results_list)
         fig_line.update_layout(template = onramp_template_dashboard) #legend in top left
@@ -1156,7 +1163,7 @@ def init_callbacks(dash_app):
         fig_returns_stats.update_layout(height = 320)
 
         end = time.time()
-        print("Finished Everything", stock_choice_1, ":", end - start)
+        print("Finished Everything:", end - start)
         return fig, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats
 
 
@@ -1183,27 +1190,50 @@ def init_callbacks(dash_app):
         
         tickers = tickers.replace(" ", '') #remove any extra spaces
         tickers_list = tickers.split(',')
+        tickers_list = [each_string.lower() for each_string in tickers_list]
 
         c_tickers = crypto_tickers.replace(" ", '') #remove any extra spaces
         c_tickers_list = c_tickers.split(',')
+        c_tickers_list = [each_string.lower() for each_string in c_tickers_list]
 
         full_asset_list = tickers_list + c_tickers_list
+
+        #full_asset_list = [each_string.lower() for each_string in full_asset_list]
         
         ####################################################################################################################################################
         ############### GET DATA
         ####################################################################################################################################################
+        #-------------------------OLD REDIS DATA FETCH-------------------------------------------------------------------------------
+        # data = pd.DataFrame()
+        # for ticker in full_asset_list:
+        #     data_x = r.get(ticker)
+        #     if data_x is None:
+        #         print("Could not find", ticker, "in the cache.")
+        #         data_x = bt.get(ticker, start = '2017-01-01')
+        #         r.set(ticker, data_x)
+        #         r.expire(ticker, timedelta(seconds = 86400))
+
+        #     data = data.join(data_x, how = 'outer')
+        
+        # data = data.dropna()
+
         data = pd.DataFrame()
         for ticker in full_asset_list:
-            data_x = r.get(ticker)
-            if data_x is None:
-                print("Could not find", ticker, "in the cache.")
+            
+            try: 
+                no_dash = ticker
+                if '-' in ticker:
+                    no_dash = ticker.replace('-', '')
+                data_x = get_dashboard_data([no_dash])
+                print("Got", ticker)
+            except:
+                print("Could not find", ticker, "in the DB.")
                 data_x = bt.get(ticker, start = '2017-01-01')
-                r.set(ticker, data_x)
-                r.expire(ticker, timedelta(seconds = 86400))
-
             data = data.join(data_x, how = 'outer')
         
         data = data.dropna()
+        data.index = pd.to_datetime(data.index)
+
         if(crypto_max == None or crypto_max == ""): #In order to make crypto allocation optional
             crypto_max = 120
         crypto_max = float(crypto_max)/100
@@ -1265,6 +1295,7 @@ def init_callbacks(dash_app):
 
         crypto_tickers = crypto_tickers.replace('-', '')
         crypto_list = crypto_tickers.split(',')
+        crypto_list = [x.lower() for x in crypto_list]
         only_stock_list = tickers_list
         crypto_sum = 0
         stock_sum = 0

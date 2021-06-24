@@ -36,7 +36,15 @@ def eager_fetch_all_stock_data():
     for key in dict_of_tickers.keys():
         dict_of_frames[key] = pd.DataFrame(dict_of_tickers[key])
 
-    def get_stock(stock):
-        return dict_of_frames[stock]
+    def get_stock(stocks):
+
+        df_final = pd.DataFrame()
+        for stock in stocks:
+            df = dict_of_frames[stock]
+            df.columns = ['trash', df.iloc[3][3], 'Date', 'symbol']
+            df = df.drop(columns = ['trash', 'symbol'] )
+            df = df.set_index('Date')
+            df_final = df_final.join(df, how = 'outer')
+        return df_final 
 
     return get_stock

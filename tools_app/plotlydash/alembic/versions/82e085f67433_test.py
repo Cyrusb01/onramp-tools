@@ -1,15 +1,16 @@
-"""baseline
+"""test
 
-Revision ID: e83ac4c81959
+Revision ID: 82e085f67433
 Revises: 
-Create Date: 2021-06-08 20:14:22.906269
+Create Date: 2021-06-23 11:10:13.170056
 
 """
 from alembic import op
 import sqlalchemy as sa
 
+
 # revision identifiers, used by Alembic.
-revision = 'e83ac4c81959'
+revision = '82e085f67433'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -26,6 +27,17 @@ def upgrade():
         sa.Column('price_open', sa.Float),
         sa.Column('volume', sa.Float),
         sa.Column('datetime', sa.DateTime)
+    )
+    op.create_primary_key(
+        "pk_cryptocurrency_pairs", "cryptocurrency_pairs",
+        ["asset_1", "asset_2", "datetime"]
+    )
+
+    op.create_table(
+        "close_data",
+        sa.Column("symbol", sa.String, primary_key=True),
+        sa.Column("close", sa.Float),
+        sa.Column("date", sa.Date, primary_key= True)
     )
 
 
