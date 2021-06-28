@@ -1047,7 +1047,7 @@ def Inputs():
                             style = {"width" : "100%", "height": "60%"}
 
                         ),
-                    ],width={'size':4}, className= " mb-4", 
+                    ],width={'size':6}, className= " mb-4", 
                     ), 
 
                     dbc.Col([
@@ -1063,7 +1063,7 @@ def Inputs():
                             ), 
                             dbc.InputGroupAddon("%", addon_type = "append"),
                         ], size = 'sm' )
-                        ],width={'size': 6, 'offset':1},
+                        ],width={'size': 5, 'offset':1},
                     ),
                 ]),
 
@@ -1079,7 +1079,7 @@ def Inputs():
                             style = {"width" : "100%", "height": "100%"}
 
                         ),
-                    width={'size':4}, className= "mb-4"
+                    width={'size':6}, className= "mb-4"
                     ), 
 
                     dbc.Col([
@@ -1094,7 +1094,7 @@ def Inputs():
                             ), 
                             dbc.InputGroupAddon("%", addon_type = "append"),
                         ], size = 'sm')
-                    ], width={'size':6, 'offset':1}),
+                    ], width={'size':5, 'offset':1}),
                 ]),
 
                 #Inputs 3 
@@ -1109,7 +1109,7 @@ def Inputs():
                             style = {"width" : "100%", "height": "100%"}
 
                         ),
-                    width={'size':4}, className= "mb-4"
+                    width={'size':6}, className= "mb-4"
                     ), 
 
                     dbc.Col([
@@ -1124,7 +1124,7 @@ def Inputs():
                             ), 
                             dbc.InputGroupAddon("%", addon_type = "append"),
                         ], size = 'sm')
-                        ], width={'size':6, 'offset':1},
+                        ], width={'size':5, 'offset':1},
                     ),
                 ]),
 
@@ -1140,7 +1140,7 @@ def Inputs():
                             style = {"width" : "100%", "height": "100%"}
 
                         ),
-                    width={'size':4}, className= "mb-2"
+                    width={'size':6}, className= "mb-2"
                     ), 
 
                     dbc.Col([
@@ -1154,10 +1154,10 @@ def Inputs():
                         ), 
                         dbc.InputGroupAddon("%", addon_type = "append"),
                         ], size = 'sm')
-                        ],width={'size':6, 'offset':1},
+                        ],width={'size':5, 'offset':1},
                     ),
                 ]),
-
+                
                 #Inputs 5 
                 dbc.Row([
                     dbc.Col([
@@ -1177,17 +1177,17 @@ def Inputs():
                         dbc.Popover(
                             children = [
                             dbc.PopoverHeader("Rebalance Frequency", style = {"color": "black"}),
-                            dbc.PopoverBody("Desired interval at which a rebalance to optimal portfolio allocation occurs."),
+                            dbc.PopoverBody("Desired interval at which a rebalance occurs."),
                             ],
                             id = "pop_freq",
                             target = "Frequency_sel",
                             trigger = "hover"
                         ),
-                    ], width={'size':4}, className= "mb-2" #Empty Col for Rebalance 
+                    ], width={'size':6}, className= "mb-2" #Empty Col for Rebalance 
                     ), 
 
                     dbc.Col([
-                        dbc.FormText("Rebalance Threshold %"),
+                        dbc.FormText("Rebalance %"),
                         dbc.InputGroup([
                             dbc.Input(
                                 id = "Rebalance",
@@ -1207,22 +1207,39 @@ def Inputs():
                             id = "pop_rebal",
                             target = "Rebalance",
                             trigger = "hover"
-                        )
-                        ],width={'size':6, 'offset':1}, className= "mb-4"
+                        ),
+                        
+                        ],width={'size':5, 'offset':1}, className= "mb-4"
                     ),
                 ]),
-
+                dbc.Row(
+                    dbc.Col(
+                        dbc.Alert(
+                                "Allocation Should be 100%",
+                                id="alloc_alert",
+                                dismissable=True,
+                                fade=False,
+                                is_open=False,
+                                color = "danger",
+                                style = {"height": 45},
+                                duration = 4000
+                        ),
+                    width = {'size': 12}
+                    )
+                ),
                 #Submit Button
                 dbc.Row([
                     
-                    dbc.Col(
+                    dbc.Col([
                         dbc.Button(
                             id = "submit_button",
                             children= "Create Strategy",
                             n_clicks=0,
                             style= {"width": "100%", "height": "100%"}
 
-                        ), width={'size':11, 'offset':0},
+                        ), 
+                        
+                        ], width={'size':12, 'offset':0},
                     ),
                 ]),
                 
@@ -1285,7 +1302,7 @@ def DisplayStats():
             dcc.Loading(id = "loading_stats", children=
             dcc.Graph(
                 id = "stats_table",
-                style= {"responsive": True}
+                style= {"responsive": True, "height": 350}
             )
             )
         ]),  
@@ -1632,7 +1649,7 @@ def DisplayStats():
             dcc.Loading(id = "loading_stats", children=
             dcc.Graph(
                 id = "stats_table_o",
-                style= {"responsive": True}
+                style= {"responsive": True, "height": 350}
             )
             )
         ]),  

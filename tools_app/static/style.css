@@ -1,11 +1,13 @@
 .header {
   padding: 0px;
   text-align: center;
-  background: #131c4f;
+  background: #b8bbca;
   color: white;
   font-size: 30px;
 }
-
+.body{
+  background: #b8bbca;
+}
   /* Create four equal columns that floats next to each other */
 .column {
   float: left;
@@ -14,3 +16,49 @@
   min-height: 100%;
 }
 
+h1 {text-align: center;}
+p {text-align: center;}
+
+/* This is for a card */
+.bg-custom-1 {
+  background-color: #131c4f;
+}
+
+.navbar-custom {
+  background-color: #f5f5f5;
+}
+
+.nav-link {
+  display: block;
+  padding: .5rem 1rem;
+  color: black;
+  text-decoration: none;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
+}
+
+
+.nav-pills .show>.nav-link {
+  color: #fff;
+  background-color: #00eead;
+
+}
+
+.nav-pills .nav-link.active {
+  color: #fff;
+  background-color: #00eead;
+}
+
+.nav-pills .nav-link:hover {
+  color: #fff;
+  background-color: #00eead;
+}
+
+.nav-item {
+  border-radius: 3px;
+  border-color: black;
+}
+
+.nav-pills .nav-link.active, .nav-pills .show>.nav-link {
+  color: #fff;
+  background-color: #00eead;
+}

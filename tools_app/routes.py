@@ -10,6 +10,9 @@ def home():
 
 @app.route('/markets')
 def markets():
-    """Landing page."""
     return render_template("markets.html")
+
+@app.route('/heat')
+def heat():
+    return render_template("cryptoheat.html")
     

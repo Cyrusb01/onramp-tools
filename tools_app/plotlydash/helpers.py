@@ -6,7 +6,7 @@ from .formatting import onramp_colors, onramp_template, onramp_template_dashboar
 from .db_to_csv_transformer import eager_fetch_all_crypto_data
 from PIL import Image
 
-
+img = Image.open("tools_app/assets/onramp-logo-small.png")
 get_coin = eager_fetch_all_crypto_data()
 
 #Gets data from csvs to use in functions 
@@ -230,13 +230,13 @@ def line_chart(results_list):
     dict(
         source=img,
         xref="paper", yref="paper",
-        x=.8, 
-        y=.2,
-        sizex=0.7, 
-        sizey=0.7,
+        x=.92, 
+        y=.1,
+        sizex=0.6, 
+        sizey=0.6,
         xanchor="right", 
         yanchor="bottom",
-        opacity = .3,
+        opacity = .1,
 
     )
     )
@@ -308,6 +308,21 @@ def scatter_plot(results_list):
     #fig.update_layout(legend = {"y": -.38})
     fig.update_traces(
                 hovertemplate="Annual Risk = %{x:.0}%<br>Annual Return = %{y:.0}%"
+    )
+    img = Image.open("tools_app/assets/onramp-logo-small.png")
+    fig.add_layout_image(
+    dict(
+        source=img,
+        xref="paper", yref="paper",
+        x=.92, 
+        y=.1,
+        sizex=0.6, 
+        sizey=0.6,
+        xanchor="right", 
+        yanchor="bottom",
+        opacity = .1,
+
+    )
     )
     
     return fig
@@ -386,6 +401,20 @@ def short_stats_table(results_list):
             }
         )
     fig.update_layout(margin = dict(l=2, r=1, t=0, b=0))
+    fig.add_layout_image(
+    dict(
+        source=img,
+        xref="paper", yref="paper",
+        x=.7, 
+        y=.2,
+        sizex=0.6, 
+        sizey=0.6,
+        xanchor="right", 
+        yanchor="bottom",
+        opacity = .1,
+
+    )
+    )
     
     return fig
 
@@ -691,7 +720,17 @@ def stats_table(results_list):
     fig.update_layout(margin = dict(l=2, r=1, t=0, b=10), 
             paper_bgcolor="rgba(0,0,0,0)",
             plot_bgcolor="rgba(0,0,0,0)",)
-
+    fig.add_layout_image(dict(
+        source=img,
+        xref="paper", yref="paper",
+        x=.7, 
+        y=.23,
+        sizex=0.6, 
+        sizey=0.6,
+        xanchor="right", 
+        yanchor="bottom",
+        opacity = .1,
+    ))
     return fig
 
 

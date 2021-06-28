@@ -21,12 +21,10 @@ from .db_to_csv_transformer import eager_fetch_all_stock_data
 
 
 
-
-
 def init_callbacks(dash_app):
 
     
-
+    
     # btc = get_coin('bitcoin')
     # df_btc = pd.DataFrame(btc)
     # print(df_btc)
@@ -178,7 +176,9 @@ def init_callbacks(dash_app):
     # 000 - CUSTOM PAGE DATA
     ####################################################################################################
 
-    data = get_data()
+    data = get_dashboard_data(['spy', 'agg', 'btcusd'])
+    data = data.dropna()
+    data.index = pd.to_datetime(data.index)
     returns = calculate_controls(data)
 
     results_control = returns[0]
@@ -270,7 +270,7 @@ def init_callbacks(dash_app):
             )
             fig.update_traces(textfont_size=17, marker=dict( line=dict(color='white', width=1)))
             fig.update_layout(titlefont=dict(size=24, color= onramp_colors["gray"]))
-            fig.update_layout(margin=dict(l=20, r=0, t=40, b=0))
+            fig.update_layout(margin=dict(l=20, r=2, t=40, b=0))
 
             return fig
 
@@ -431,7 +431,7 @@ def init_callbacks(dash_app):
             colors = [onramp_colors['dark_blue'], "#3fb6dc", "#f2a900"]
             if x_axis_rr_ss[0] == "Ann. Return":
                 title = "<b>Ann. Return & Risk<b>"
-                max_range = 0.4
+                max_range = 0.5
             else:
                 title = "<b>Sharpe & Sortino Ratio<b>"
                 for i in range(len(y_combined)):
@@ -482,7 +482,7 @@ def init_callbacks(dash_app):
             else:
                 fig.update_traces(texttemplate="<b>%{y:.9}<b>", textposition="outside")
                 fig.update_traces(hovertemplate="%{y:.3}")
-            fig.update_layout(uniformtext_minsize=21, uniformtext_mode="hide")
+            fig.update_layout(uniformtext_minsize=21, uniformtext_mode='show')
             fig.update_yaxes(showticklabels=False)
             fig.update_yaxes(range=[0, max_range])
             fig.update_layout(
@@ -501,12 +501,12 @@ def init_callbacks(dash_app):
                 bargap=0.15,  # gap between bars of adjacent location coordinates.
                 bargroupgap=0.1,  # gap between bars of the same location coordinate.
             )
-            # fig.update_layout(
-            #     {"plot_bgcolor": "rgba(0, 0, 0, 0)", "paper_bgcolor": "rgba(0, 0, 0, 0)",}
-            # )
+            fig.update_layout(
+                {"plot_bgcolor": "rgba(0, 0, 0, 0)", "paper_bgcolor": "rgba(0, 0, 0, 0)",}
+            )
             fig.update_layout(xaxis_tickfont_size=19)
             fig.update_layout(titlefont=dict(size=24, color="white"))
-            fig.update_layout(margin = dict(l=10, r=0, t=20, b=0))
+            fig.update_layout(margin = dict(l=10, r=0, t=50, b=0))
 
             return fig
 
@@ -1047,7 +1047,8 @@ def init_callbacks(dash_app):
         Output("stats_table", "figure"),
         Output("month_table", "figure"),
         Output("balance_table", "figure"),
-        Output("return_stats", "figure")
+        Output("return_stats", "figure"),
+        Output("alloc_alert", "is_open"),
         ],
         
         Input("submit_button", "n_clicks"),
@@ -1060,10 +1061,11 @@ def init_callbacks(dash_app):
         State('Ticker4', 'value'),
         State('Allocation4', 'value'),
         State('Frequency_sel', 'value'),
+        State("alloc_alert", "is_open"),
         State('Rebalance', 'value'),
         
     )
-    def update_graph(num_click, stock_choice_1, alloc1, stock_choice_2, alloc2, stock_choice_3, alloc3, stock_choice_4, alloc4,  freq_sel, rebalance = 1.2,):
+    def update_graph(num_click, stock_choice_1, alloc1, stock_choice_2, alloc2, stock_choice_3, alloc3, stock_choice_4, alloc4,  freq_sel, alloc_alert, rebalance = 1.2):
         start = time.time()
         ####################################################### PIE CHART ##########################################################################################
         stock_list_pie = [stock_choice_1, stock_choice_2, stock_choice_3, stock_choice_4]
@@ -1254,7 +1256,11 @@ def init_callbacks(dash_app):
 
         end = time.time()
         print("Finished Everything:", end - start)
-        return fig, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats
+
+        alert = False
+        if (float(alloc1) + float(alloc2) + float(alloc3) + float(alloc4)) > 100:
+            alert = True
+        return fig, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats, alert
 
 
     ####################################################################################################
