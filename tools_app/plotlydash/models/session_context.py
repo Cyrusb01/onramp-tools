@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 
 # 'postgresql://postgres:password@localhost/onramp_research'
-postgres_uri = os.getenv("POSTGRES_URL")
+postgres_uri = os.getenv("DATABASE_URL")
 
 
 @contextmanager
