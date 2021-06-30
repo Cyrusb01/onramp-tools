@@ -385,6 +385,7 @@ def short_stats_table(results_list):
         else:
             text_color.append(onramp_colors['btc'])
     fig = go.Figure(data=[go.Table(
+                            columnwidth = [100, 120, 100, 100],
                             header=dict(values= labels,
                                         line_color= 'rgba(100, 100, 100, 0.36)',
                                         fill_color= onramp_colors['cyan'],
