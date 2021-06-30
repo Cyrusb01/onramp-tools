@@ -1,10 +1,9 @@
 
 import plotly.graph_objs as go
-from PIL import Image
 
-img = Image.open("tools_app/assets/onramp-logo-small.png")
-# with Image.open("tools_app/assets/onramp-logo-small.png") as im:
-#     im.show()
+
+
+
 ####################################################################################################
 # 000 - FORMATTING INFO
 ####################################################################################################
@@ -19,9 +18,13 @@ onramp_colors = {
     "cyan"      : "#3FB6DC",
     "orange"    : "#FF7052",
     "white"     : "white",
-    "btc"       : "#f2a900"
+    "btc"       : "#f2a900",
+    "black"     : "black"
 }
 
+#########################################################
+##### CSS For Dashboard and big graphs
+#########################################################
 externalgraph_rowstyling = {"margin-left": "15px", "margin-right": "15px"}
 
 externalgraph_colstyling = {
@@ -55,7 +58,9 @@ recapdiv = {
     "background-color": "rgb(251, 251, 252, 0.1)",  # behind slider
 }
 
-
+#########################################################
+###### GENERAL TEMPLATE DARK  
+#########################################################
 onramp_title = {"font": {"size": 20, "color": onramp_colors["gray"]}}
 
 onramp_xaxis = {
@@ -80,6 +85,10 @@ onramp_yaxis = {
 }
 onramp_font_family = "Roboto"
 
+#########################################################
+###### LEGEND AT THE BOTTOM TEMPLATE DARK
+#########################################################
+
 onramp_legend = {
     "orientation": "h",
     "yanchor": "bottom",
@@ -96,7 +105,6 @@ onramp_margins = {
     "b": 0,
 }  # Set top margin to in case there is a legend
 
-
 onramp_layout = go.Layout(
     colorway= [onramp_colors["btc"], onramp_colors["white"], onramp_colors["cyan"], '#B0B6BD', onramp_colors["pink"], onramp_colors["purple"], onramp_colors["light_blue"], onramp_colors["orange"]],
     font = {'family' : onramp_font_family},
@@ -111,10 +119,11 @@ onramp_layout = go.Layout(
     margin=onramp_margins,
 )
 
+onramp_template_dark = dict(layout=go.Layout(onramp_layout))
 
-onramp_template = dict(layout=go.Layout(onramp_layout))
-
-#----------------------------Second Template for graphs which need legends inside them
+#########################################################
+###### LEGEND AT THE TOP RIGHT TEMPLATE DARK
+#########################################################
 
 onramp_legend_dashboard = {
     "orientation": "v",
@@ -133,7 +142,7 @@ onramp_margins_dashboard = {
 }  # Set top margin to in case there is a legend
 
 onramp_layout_dashboard = go.Layout(
-    colorway= [onramp_colors["btc"], onramp_colors["white"], onramp_colors["cyan"], '#B0B6BD'],
+    colorway= [onramp_colors["purple"], onramp_colors["black"], onramp_colors["cyan"], '#B0B6BD'],
     font = {'family' : onramp_font_family},
     title=onramp_title,
     title_x=0.5, # Align chart title to center
@@ -146,8 +155,99 @@ onramp_layout_dashboard = go.Layout(
     margin=onramp_margins_dashboard,
 )
 
-onramp_template_dashboard = dict(layout=go.Layout(onramp_layout_dashboard))
+onramp_template_dashboard_dark = dict(layout=go.Layout(onramp_layout_dashboard))
 
+##################################################################################################################
+################################ LIGHT TEMPLATES 
+##################################################################################################################
+
+#########################################################
+###### GENERAL TEMPLATE LIGHT  
+#########################################################
+onramp_title = {"font": {"size": 20, "color": onramp_colors["gray"]}}
+
+onramp_xaxis_light = {
+    "showgrid": False,
+    "linecolor": onramp_colors["black"],
+    "color": onramp_colors["black"],
+    "tickangle": 0,
+    "titlefont": {"size": 16, "color": onramp_colors["black"]},
+    "tickfont": {"size": 14, "color": onramp_colors["black"]},
+    "zeroline": False,
+}
+
+onramp_yaxis_light = {
+    "showgrid": False,
+    "color": onramp_colors["black"],
+    "gridwidth": 0.5,
+    "gridcolor": onramp_colors["black"],
+    "linecolor": onramp_colors["black"],
+    "titlefont": {"size": 16, "color": onramp_colors["black"]},
+    "tickfont": {"size": 14, "color": onramp_colors["black"]},
+    "zeroline": False,
+}
+
+
+#########################################################
+###### LEGEND AT THE BOTTOM TEMPLATE LIGHT
+#########################################################
+
+onramp_legend_light = {
+    "orientation": "h",
+    "yanchor": "bottom",
+    "y": -.3,
+    "xanchor": "left",
+    "x": 0,
+    "font": {"size": 17, "color": onramp_colors["black"]},
+}  # Legend will be on the bottom middle
+
+onramp_layout_light = go.Layout(
+    colorway= [onramp_colors["btc"], onramp_colors["black"], onramp_colors["cyan"], '#B0B6BD', onramp_colors["pink"], onramp_colors["purple"], onramp_colors["light_blue"], onramp_colors["orange"]],
+    font = {'family' : onramp_font_family},
+    title=onramp_title,
+    title_x=0.5, # Align chart title to center
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    xaxis=onramp_xaxis_light,
+    yaxis=onramp_yaxis_light,
+    #height=200,
+    legend=onramp_legend_light,
+    margin=onramp_margins,
+)
+
+onramp_template_light = dict(layout=go.Layout(onramp_layout_light))
+
+#########################################################
+###### LEGEND AT THE TOP RIGHT TEMPLATE LIGHT
+#########################################################
+
+onramp_legend_dashboard_light = {
+    "orientation": "v",
+    "yanchor": "top",
+    "y": 1,
+    "xanchor": "left",
+    "x": .04,
+    "font": {"size": 17, "color": onramp_colors["black"]},
+}  # Legend will be on the bottom middle
+
+
+onramp_layout_dashboard_light = go.Layout(
+    colorway= [onramp_colors["btc"], onramp_colors["black"], onramp_colors["cyan"], '#B0B6BD'],
+    font = {'family' : onramp_font_family},
+    title=onramp_title,
+    title_x=0.5, # Align chart title to center
+    paper_bgcolor="rgba(0,0,0,0)",
+    plot_bgcolor="rgba(0,0,0,0)",
+    xaxis=onramp_xaxis_light,
+    yaxis=onramp_yaxis_light,
+    legend=onramp_legend_dashboard_light,
+    margin=onramp_margins_dashboard,
+)
+
+onramp_template_dashboard_light = dict(layout=go.Layout(onramp_layout_dashboard_light))
+
+
+#Heatmap Coloring scale 
 custom_scale = [
     # Let first 10% (0.1) of the values have color rgb(0, 0, 0)
     [0, "#3FB6DC"],

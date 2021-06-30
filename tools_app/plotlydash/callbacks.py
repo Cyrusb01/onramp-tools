@@ -11,7 +11,7 @@ import pytz
 import bt
 from direct_redis import DirectRedis
 import urllib.parse as urlparse
-from .formatting import onramp_colors, onramp_template, onramp_template_dashboard, custom_scale
+from .formatting import onramp_colors, onramp_template_dark, onramp_template_dashboard_dark, onramp_template_light, onramp_template_dashboard_light, custom_scale
 from .helpers import *
 from .bt_algos import RebalanceAssetThreshold
 from .db_to_csv_transformer import eager_fetch_all_stock_data
@@ -23,28 +23,14 @@ from .db_to_csv_transformer import eager_fetch_all_stock_data
 
 def init_callbacks(dash_app):
 
-    
-    
-    # btc = get_coin('bitcoin')
-    # df_btc = pd.DataFrame(btc)
-    # print(df_btc)
 
+    
     url = urlparse.urlparse('redis://default:mUtpOEwJc2F8tHYOGxF9JGvnIwHY3unu@redis-16351.c263.us-east-1-2.ec2.cloud.redislabs.com:16351')
     r = DirectRedis(host=url.hostname, port=url.port, password=url.password)
 
 
     get_dashboard_data = eager_fetch_all_stock_data()
-    # start = time.time()
-    # # try:
-    # #     print(get_dashboard_data(['amc']))
-    # # except:
-    # #     print(bt.get('amc'))
-    # print(get_dashboard_data(['goog']))
-    # print(get_dashboard_data(['msft']))
-    # end = time.time()
-    # print("Total Time: ", end-start)
-
-
+    
     ####################################################################################################
     # 000 - IMPORT DATA SLIDER DASHBOARD
     ####################################################################################################
@@ -191,6 +177,7 @@ def init_callbacks(dash_app):
     # DASHBOARD PAGE
     ####################################################################################################
 
+
     @dash_app.callback(
         [
             dash.dependencies.Output("pie_chart", "figure"),
@@ -246,7 +233,7 @@ def init_callbacks(dash_app):
                 color_discrete_sequence=colors_pie,
                 title="Portfolio Allocation",
                 # width = 400, height = 400
-                template=onramp_template,
+                template=onramp_template_dark,
                 height=500,
                 hole = .2
             )
@@ -256,7 +243,7 @@ def init_callbacks(dash_app):
                 font=dict(family="Roboto", color= onramp_colors["gray"]),
                 title={
                     "text": "<b>Portfolio Allocation<b>",
-                    "y": 1,
+                    "y": .99,
                     "x": 0.49,
                     "xanchor": "center",
                     "yanchor": "top",
@@ -270,7 +257,7 @@ def init_callbacks(dash_app):
             )
             fig.update_traces(textfont_size=17, marker=dict( line=dict(color='white', width=1)))
             fig.update_layout(titlefont=dict(size=24, color= onramp_colors["gray"]))
-            fig.update_layout(margin=dict(l=20, r=2, t=40, b=0))
+            fig.update_layout(margin=dict(l=20, r=2, t=50, b=0))
 
             return fig
 
@@ -296,7 +283,7 @@ def init_callbacks(dash_app):
                 labels={"value": "", "Date": "", "color": "", "variable": ""},
                 title="Portfolio Performance",
                 color_discrete_map=color_dict,
-                template=onramp_template,
+                template=onramp_template_dark,
                 height = 500
                 # width = 450
             )
@@ -310,7 +297,7 @@ def init_callbacks(dash_app):
                 font=dict(family="Roboto", color= onramp_colors["gray"]),
                 title={
                     "text": "<b>Portfolio Performance<b>",
-                    "y": 1,
+                    "y": .99,
                     "x": 0.5,
                     "xanchor": "center",
                     "yanchor": "top",
@@ -357,7 +344,7 @@ def init_callbacks(dash_app):
                 # color_discrete_sequence=['#A90BFE','#FF7052','#66F3EC', '#67F9AF'],
                 color_discrete_sequence=colors,
                 opacity=1,
-                template=onramp_template,
+                template=onramp_template_dark,
                 labels={
                     "x": "",
                     "y": "Annual Return",
@@ -378,12 +365,12 @@ def init_callbacks(dash_app):
             fig.update_layout(
                 title={
                     "text": "<b>Risk vs. Return<b>",
-                    "y": 1,
+                    "y": .99,
                     "x": 0.5,
                     "xanchor": "center",
                     "yanchor": "top",
                 },
-                font=dict(family="Circular STD", color="black"),
+                font=dict(family="Roboto", color= onramp_colors["gray"]),
                 legend=dict(
                     orientation="h", yanchor="bottom", y=-0.35, xanchor="left", x=0.1
                 ),
@@ -468,7 +455,7 @@ def init_callbacks(dash_app):
                 color="Strategy",
                 barmode="group",
                 color_discrete_sequence=colors,
-                template=onramp_template,
+                template=onramp_template_dark,
                 labels={"Type": "", "Values": "", "Strategy": ""},
                 height = 490
             )
@@ -493,7 +480,7 @@ def init_callbacks(dash_app):
                     "xanchor": "center",
                     "yanchor": "top",
                 },
-                font=dict(family="Circular STD", color="white"),
+                font=dict(family="Roboto", color="white"),
                 legend=dict(
                     orientation="h", yanchor="bottom", y=-0.3, xanchor="left", x=0.20
                 ),
@@ -510,11 +497,15 @@ def init_callbacks(dash_app):
 
             return fig
 
+        #Variables that store the graphs so when the color changes no need to recalculate 
+        
+
         pie_fig = graph_pie(percent_dict)
         line_fig = graph_line_chart(df, choice)
         scatter_fig = graph_scatter_plot(risk_dic, return_dic)
         bar_rr_fig = graph_barchart(x_axis_rr, y_combined_rr, y_6040_rr, y_spy_rr)
         bar_ss_fig = graph_barchart(x_axis_ss, y_combined_ss, y_6040_ss, y_spy_ss)
+        
         return pie_fig, line_fig, scatter_fig, bar_rr_fig, bar_ss_fig
 
     ####################################################################################################
@@ -526,7 +517,6 @@ def init_callbacks(dash_app):
         [dash.dependencies.Input("dropdown", "value")],
     )
     def update_vol(value):
-        
         def graph_volatility(df, coins, xd):
             source = "Binance"
             yaxis_dict = dict(
@@ -702,8 +692,6 @@ def init_callbacks(dash_app):
 
         name = pairs_crypto_db_dict[value]
         df = calc_volatility_annualized([name]) #Used for Crypto Vol Chart
-        print(df)
-        print(name)
         df_btc = df[[f'{name}_vol_30', f'{name}_vol_60', f'{name}_vol_7', f'{name}_vol_14']].copy() #Annualized bitcoin vol chart
 
         df_btc.columns = ['Ann. 30D Volatility', 'Ann. 60D Volatility', 'Ann. 7D Volatility', 'Avg30DVolatility']
@@ -736,7 +724,7 @@ def init_callbacks(dash_app):
                 font=dict(family="Roboto", color="white"),
                 title={
                     "text": f"<b>Annualized 30D & 60D Volatility - {value}<b>",
-                    "y": 1,
+                    "y": .99,
                     "x": 0.5,
                     "xanchor": "center",
                     "yanchor": "top",
@@ -785,11 +773,11 @@ def init_callbacks(dash_app):
                                                     fill_color= '#b0b6bd',
                                                     align=['center','center', 'center'],
                                                     height = 50,
-                                                    font=dict(color='black', size=30, family = "roboto")),
+                                                    font=dict(color='black', size=30, family = "Roboto")),
                                         cells=dict(values=[['Ann. 7D Volatility', 'Ann. 30D Volatility', 'Ann. 60D Volatility'], [str(round(a7*100, 2))+'%', str(round(a30*100, 2))+'%', str(round(a60*100, 2))+'%'], [str(round(df_btc['Ann. 7D Volatility'].iloc[-1]*100, 2))+'%', str(round(df_btc['Ann. 30D Volatility'].iloc[-1]*100, 2))+'%', str(round(df_btc['Ann. 60D Volatility'].iloc[-1]*100, 2))+'%']],
                                                     line_color = 'white',
                                                     height = 40,
-                                                    font = dict(color = 'white', size = 20, family = "roboto"),
+                                                    font = dict(color = 'white', size = 20, family = "Roboto"),
                                                     fill_color = '#131c4f' )) ])
             fig.update_layout(margin = dict(l=1, r=0, t=0, b=0))
             fig.update_layout(
@@ -1040,6 +1028,8 @@ def init_callbacks(dash_app):
     ####################################################################################################
     # CUSTOM STRATEGY PAGE
     ####################################################################################################
+    
+    
     @dash_app.callback(
         [Output('pie_chart_c', 'figure'),
         Output('line_chart_c', 'figure'),
@@ -1049,9 +1039,11 @@ def init_callbacks(dash_app):
         Output("balance_table", "figure"),
         Output("return_stats", "figure"),
         Output("alloc_alert", "is_open"),
+        #Output("pie_card", "color")
         ],
         
         Input("submit_button", "n_clicks"),
+        #Input("mode_switch", "n_clicks"),
         State('Ticker1', 'value'),
         State('Allocation1', 'value'),
         State('Ticker2', 'value'),
@@ -1067,12 +1059,64 @@ def init_callbacks(dash_app):
     )
     def update_graph(num_click, stock_choice_1, alloc1, stock_choice_2, alloc2, stock_choice_3, alloc3, stock_choice_4, alloc4,  freq_sel, alloc_alert, rebalance = 1.2):
         start = time.time()
+
+       
+
+
+        # ########################################### LIGHT MODE ################################################
+        # #Global variables because we want to be able to access the last graphs without recalculating everything 
+        # global fig_pie 
+        # global fig_line
+        # global fig_scat
+        # global fig_stats 
+        # global fig_month_table 
+        # global fig_balance_table 
+        # global fig_returns_stats 
+        # global alert
+        # global mode 
+        # global bg_color 
+
+        
+        
+
+        # if mode_click == 0: #first run through to just set all the variables, so theres no errors 
+        #     print("set to None")
+        #     mode = "dark"
+        #     bg_color = onramp_colors["dark_blue"]
+        #     fig_pie = None 
+        #     fig_line = None 
+        #     fig_scat = None 
+        #     fig_stats = None 
+        #     fig_month_table = None 
+        #     fig_month_table = None 
+        #     fig_balance_table = None 
+        #     fig_returns_stats = None 
+        #     alert = None
+
+        # if mode_click: #If the light mode is clicked
+        #     if mode == "dark":
+        #         mode = "light"
+        #         template_ = onramp_template_light
+        #         template_d = onramp_template_dashboard_light
+        #         bg_color = onramp_colors["white"]
+        #     else: 
+        #         mode = "dark"
+        #         template_ = onramp_template_dark
+        #         template_d = onramp_template_dashboard_dark
+        #         bg_color = onramp_colors["dark_blue"]
+        #     #template = onramp_template_{mode}.format
+        #     fig_pie.update_layout(template = template_)
+        #     fig_line.update_layout(template = template_d)
+        #     fig_scat.update_layout(template = template_d)
+        #     return fig_pie, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats, alert, bg_color
+
+
         ####################################################### PIE CHART ##########################################################################################
         stock_list_pie = [stock_choice_1, stock_choice_2, stock_choice_3, stock_choice_4]
         percent_list = [float(alloc1)/100, float(alloc2)/100, float(alloc3)/100, float(alloc4)/100]
 
-        fig = plotly_pie(stock_list_pie, percent_list)
-        #px.pie( values = percent_list, names = stock_list_pie, color = stock_list_pie, title="", template= onramp_template, hole = .3, height = 300)
+        
+        
         
         ##################################################### SETTING UP DATA #############################################################################################
         stock_choice_1 = stock_choice_1.lower()
@@ -1115,7 +1159,6 @@ def init_callbacks(dash_app):
         
         data = data.dropna()
         data.index = pd.to_datetime(data.index) 
-        print(data)
         data_e = time.time()
         print("Finished Data:", data_e - data_s)
 
@@ -1233,12 +1276,13 @@ def init_callbacks(dash_app):
             results_list_t = [results_d, results_m, results_q, results_y, results_control]
             
             
-    
+        fig_pie = plotly_pie(stock_list_pie, percent_list)
+
         fig_line = line_chart(results_list_t) #use t so we can do the compare all 
-        fig_line.update_layout(template = onramp_template_dashboard) #legend in top left
+        fig_line.update_layout(template = onramp_template_dashboard_dark) #legend in top left
 
         fig_scat = scatter_plot(results_list_t)
-        fig_scat.update_layout(template = onramp_template_dashboard) #legend in top left
+        fig_scat.update_layout(template = onramp_template_dashboard_dark) #legend in top left
 
         fig_stats = stats_table(results_list)
 
@@ -1260,9 +1304,11 @@ def init_callbacks(dash_app):
         alert = False
         if (float(alloc1) + float(alloc2) + float(alloc3) + float(alloc4)) > 100:
             alert = True
-        return fig, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats, alert
+        return fig_pie, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats, alert
 
 
+    ######################################## LIGHT MODE CALLBACKS #####################################
+   
     ####################################################################################################
     # PORTFOLIO OPTIMIZER PAGE
     ####################################################################################################
@@ -1474,11 +1520,11 @@ def init_callbacks(dash_app):
 
         results_list = [results_op_d, results_control, results_spy, results_agg]
         fig_line = line_chart(results_list)
-        fig_line.update_layout(template = onramp_template_dashboard)
+        fig_line.update_layout(template = onramp_template_dashboard_dark)
 
         
         fig_scat = scatter_plot(results_list) #scatter function in functions
-        fig_scat.update_layout(template = onramp_template_dashboard)
+        fig_scat.update_layout(template = onramp_template_dashboard_dark)
 
         fig_stats = stats_table(results_list)
 

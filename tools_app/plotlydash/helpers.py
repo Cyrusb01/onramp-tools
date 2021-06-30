@@ -2,7 +2,7 @@ import pandas as pd
 import bt
 import plotly.express as px
 import plotly.graph_objects as go
-from .formatting import onramp_colors, onramp_template, onramp_template_dashboard
+from .formatting import onramp_colors, onramp_template_dark, onramp_template_dashboard_dark
 from .db_to_csv_transformer import eager_fetch_all_crypto_data
 from PIL import Image
 
@@ -212,7 +212,7 @@ def line_chart(results_list):
 
     fig = px.line(result_final, labels=dict(index="<b>Click Legend Icons to Toggle Viewing<b>", value="", variable=""),
                     title="",
-                    template= onramp_template
+                    template= onramp_template_dark
                     #height = 350
                     )
     
@@ -246,7 +246,7 @@ def line_chart(results_list):
 def plotly_pie(stock_list, percent_list):
     for i in range(len(stock_list)):
         stock_list[i] = stock_list[i].upper()
-    fig = px.pie( values = percent_list, names = stock_list, color = stock_list, template = onramp_template, hole = .3)
+    fig = px.pie( values = percent_list, names = stock_list, color = stock_list, template = onramp_template_dark, hole = .3)
     
     fig.update_traces(textfont_size=17, marker=dict( line=dict(color='white', width=1)))
     fig.update_layout(font = dict(color = "white"))
@@ -302,7 +302,7 @@ def scatter_plot(results_list):
                             "color" : ""
                             },
                             title="", 
-                            template= onramp_template,
+                            template= onramp_template_dark,
                             #width = 530, height = 350
                             )
     #fig.update_layout(legend = {"y": -.38})
@@ -344,7 +344,7 @@ def balance_table(results, results_con):
                                             line_color= 'rgba(100, 100, 100, 0.36)',
                                             fill_color= onramp_colors['cyan'],
                                             align=['center','center'],
-                                            font=dict(color='black', size=12)),
+                                            font=dict(color='black', size=15)),
                                 cells=dict(values=[['60-40 Portfolio', series_res.columns[0]], ["$100", "$100"], [final_con, final_res]],
                                             line_color = 'rgba(100, 100, 100, 0.36)',
                                             font = dict(color = [text_color*3], size = 12),
@@ -354,7 +354,8 @@ def balance_table(results, results_con):
             {
                 "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
                 "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
+            },
+            font=dict(family="Roboto")
         )
     fig.update_layout(margin = dict(l=1, r=1, t=0, b=0))
     
@@ -388,7 +389,7 @@ def short_stats_table(results_list):
                                         line_color= 'rgba(100, 100, 100, 0.36)',
                                         fill_color= onramp_colors['cyan'],
                                         align=['center','center'],
-                                        font=dict(color='black', size=12)),
+                                        font=dict(color='black', size=15)),
                             cells=dict(values=[stats_combined.index, stats_combined.Your_Strategy, stats_combined.Portfolio6040, stats_combined.Difference],
                                         line_color = 'rgba(100, 100, 100, 0.36)',
                                         height = 26,
@@ -398,7 +399,8 @@ def short_stats_table(results_list):
             {
                 "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
                 "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
+            },
+            font=dict(family="Roboto")
         )
     fig.update_layout(margin = dict(l=2, r=1, t=0, b=0))
     fig.add_layout_image(
@@ -594,7 +596,10 @@ def monthly_table(results_list):
             {
                 "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
                 "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
+                
+            },
+            font=dict(family="Roboto")
+
         )
 
     return fig
@@ -615,7 +620,7 @@ def optomize_table(df):
                                         line_color= 'rgba(100, 100, 100, 0.36)',
                                         fill_color= onramp_colors["cyan"],
                                         align=['center','center'],
-                                        font=dict(color='black', size=12)),
+                                        font=dict(color='black', size=15)),
                             cells=dict(values=[df.index, df.Allocation],
                                         line_color = 'rgba(100, 100, 100, 0.36)',
                                         height = 30,
@@ -627,7 +632,8 @@ def optomize_table(df):
             {
                 "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
                 "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
+            },
+            font=dict(family="Roboto")
         )
     return fig
 
@@ -711,7 +717,7 @@ def stats_table(results_list):
                                         line_color= 'rgba(100, 100, 100, 0.36)',
                                         fill_color= onramp_colors["cyan"],
                                         align=['center','center'],
-                                        font=dict(color='black', size=12)),
+                                        font=dict(color='black', size=15)),
                             cells=dict(values=[df.Stats, df.Your_Strategy, df.Portfolio6040],
                                         line_color = 'rgba(100, 100, 100, 0.36)',
                                         height = 26,
@@ -719,7 +725,8 @@ def stats_table(results_list):
                                         fill_color =  onramp_colors["dark_blue"])) ])
     fig.update_layout(margin = dict(l=2, r=1, t=0, b=10), 
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",)
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Roboto"))
     fig.add_layout_image(dict(
         source=img,
         xref="paper", yref="paper",

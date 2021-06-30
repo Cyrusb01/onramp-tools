@@ -102,6 +102,7 @@ def get_navbar(p="dashboard"):
                 dbc.NavItem(dbc.NavLink("Dashboard", active=True, href="/apps/dashboard", style = {"color": "black", "outline-color": 'black'})),
                 dbc.NavItem(dbc.NavLink("Custom Strategy Dashboard", href="/apps/custom-dashboard", style = {"color": "black"})),
                 dbc.NavItem(dbc.NavLink("Portfolio Optimizer", href="/apps/portfolio-optimizer", style = {"color": "black"})),
+                #dbc.NavItem(dbc.NavLink("Heat", href="/heat", style = {"color": "black"})),
                 #dbc.NavItem(dbc.NavLink("Crypto Indexes", href="/apps/crypto-index", style = {"color": "black"})),
                 dbc.DropdownMenu(
                     [
@@ -1251,7 +1252,9 @@ def Inputs():
 def DisplayPie():
     pie = dbc.Card([
         
-        dbc.CardHeader(children= html.H3("Portfolio Allocation"), style = {"font": "Roboto", "color": onramp_colors["gray"]}),
+        dbc.CardHeader(children= html.H3("Portfolio Allocation"), 
+        style = {"font": "Roboto", "color": onramp_colors["black"]}
+        ),
         dbc.CardBody([
             
             dcc.Loading( id = "loading_pie", children=
@@ -1363,6 +1366,11 @@ custom_page = dbc.Container([
                     
                     html.P(children= "Use the following tool to build hypothetical portfolios of equities, ETFs, and various Cryptoassets.  Analyze the impact of cryptoassets modeled in a traditional portfolio allocation. Over time we will enable advisors to create custom reports for clients based on the output.", 
                             style = {"fontSize": "vmin", "color": onramp_colors["white"]}),
+                    
+                    # dbc.Button(
+                    #     "Click me", id="mode_switch", className="mr-2", n_clicks=0
+                    # ),
+                    
                 ]),
             className="text-center mb-2", color= onramp_colors["dark_blue"], inverse= True,), 
         width = 12)

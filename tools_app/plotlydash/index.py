@@ -11,6 +11,14 @@ def init_dashboard(server):
         server=server,
         routes_pathname_prefix='/',
     )
+    # external_css = [
+    # "https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/css/bootstrap.min.css",
+    # "https://fonts.googleapis.com/css?family=Roboto|Lato",
+    # 'https://codepen.io/chriddyp/pen/bWLwgP.css',
+    # ]   
+
+    # for css in external_css:
+    #     dash_app.css.append_css({"external_url": css})
 
     # Create Dash Layout
     dash_app.layout = html.Div(
