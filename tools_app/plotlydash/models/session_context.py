@@ -7,6 +7,7 @@ from sqlalchemy.orm import scoped_session, sessionmaker
 
 # 'postgresql://postgres:password@localhost/onramp_research'
 postgres_uri = os.getenv("DATABASE_URL").replace("://", "ql://", 1)
+print(postgres_uri)
 
 
 @contextmanager
