@@ -16,9 +16,8 @@ def db_session():
     """
     engine = create_engine(postgres_uri, convert_unicode=True)
     connection = engine.connect()
-    print("Open Connection")
     db_sesh = scoped_session(sessionmaker(autocommit=False, autoflush=True, bind=engine))
     yield db_sesh
     db_sesh.close()
     connection.close()
-    print("close connection")
+    

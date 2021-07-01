@@ -27,7 +27,7 @@ def eager_fetch_all_crypto_data():
 def eager_fetch_all_stock_data():
     all_assets = []
     with db_session() as session:
-        all_assets = session.query(CloseData).filter(CloseData.symbol.in_(['spy','agg','btcusd'])).all()
+        all_assets = session.query(CloseData).filter(CloseData.symbol.in_(['spy','agg','btcusd', 'ethusd', 'msft', 'goog'])).all()
 
     
     dict_of_tickers = defaultdict(list)
@@ -38,15 +38,39 @@ def eager_fetch_all_stock_data():
         dict_of_frames[key] = pd.DataFrame(dict_of_tickers[key])
 
     def get_stock(stocks):
-
+        
         df_final = pd.DataFrame()
+       
         for stock in stocks:
-            df = dict_of_frames[stock]
-            df = df.rename(columns={'date': 'Date', 'close': df['symbol'].iloc[0]})
-            df = df.drop(columns = ['_sa_instance_state', 'symbol'] )
-            df = df.set_index('Date')
-            df_final = df_final.join(df, how = 'outer')
-            
+            try: 
+                df = dict_of_frames[stock] 
+                df = df.rename(columns={'date': 'Date', 'close': df['symbol'].iloc[0]})
+                df = df.drop(columns = ['_sa_instance_state', 'symbol'] )
+                df = df.set_index('Date')
+                df_final = df_final.join(df, how = 'outer')
+            except:
+                with db_session() as session:
+                    asset = []
+                    asset= session.query(CloseData).filter(CloseData.symbol.in_([stock])).all()
+                    
+                    for item in asset:
+                        
+                        dict_of_tickers[item.symbol].append(item.__dict__)
+                    
+                    dict_of_frames[stock] = pd.DataFrame(dict_of_tickers[stock])
+                    
+                    df = dict_of_frames[stock] 
+                    
+                    df = df.rename(columns={'date': 'Date', 'close': df['symbol'].iloc[0]})
+                    df = df.drop(columns = ['_sa_instance_state', 'symbol'] )
+                    df = df.set_index('Date')
+                    df_final = df_final.join(df, how = 'outer')
+                    
+
+
+
+
+
         return df_final 
 
     return get_stock
