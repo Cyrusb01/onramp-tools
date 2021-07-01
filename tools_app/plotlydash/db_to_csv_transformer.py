@@ -27,8 +27,9 @@ def eager_fetch_all_crypto_data():
 def eager_fetch_all_stock_data():
     all_assets = []
     with db_session() as session:
-        all_assets = session.query(CloseData).all()
+        all_assets = session.query(CloseData).filter(CloseData.symbol=='spy').all()
 
+    
     dict_of_tickers = defaultdict(list)
     for item in all_assets:
         dict_of_tickers[item.symbol].append(item.__dict__)
