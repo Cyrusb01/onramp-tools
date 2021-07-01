@@ -11,17 +11,26 @@ import pytz
 import bt
 from direct_redis import DirectRedis
 import urllib.parse as urlparse
-from .formatting import onramp_colors, onramp_template, onramp_template_dashboard, custom_scale
+from .formatting import onramp_colors, onramp_template_dark, onramp_template_dashboard_dark, onramp_template_light, onramp_template_dashboard_light, custom_scale
 from .helpers import *
 from .bt_algos import RebalanceAssetThreshold
+from .db_to_csv_transformer import eager_fetch_all_stock_data
+
+
+
+
 
 
 def init_callbacks(dash_app):
 
+
+    
     url = urlparse.urlparse('redis://default:mUtpOEwJc2F8tHYOGxF9JGvnIwHY3unu@redis-16351.c263.us-east-1-2.ec2.cloud.redislabs.com:16351')
     r = DirectRedis(host=url.hostname, port=url.port, password=url.password)
 
 
+    get_dashboard_data = eager_fetch_all_stock_data()
+    
     ####################################################################################################
     # 000 - IMPORT DATA SLIDER DASHBOARD
     ####################################################################################################
@@ -95,6 +104,19 @@ def init_callbacks(dash_app):
         "BNB-USDT",
         "ETH-USDT",
     ]
+    pairs_crypto_db = [
+        "bitcoin",
+        "bitcoin-cash",
+        "tron",
+        "chainlink",
+        "stellar",
+        "eos",
+        "cardano",
+        "litecoin",
+        "neo",
+        "binance-coin",
+        "ethereum",
+    ]
 
     pairs_mixed = [
         "S&P 500",
@@ -120,7 +142,8 @@ def init_callbacks(dash_app):
         df_mixed.index > datetime.datetime(2020, 1, 15)
     ]  # make it so we only have 2020 data
 
-    df_vol = calc_volatility(pairs_crypto) #Used for Crypto Vol Chart 
+    df_vol = calc_volatility(pairs_crypto_db) #Used for Crypto Vol Chart 
+    df_vol.columns = df_vol.columns.str.capitalize()
 
     today = datetime.datetime.now(tz=pytz.utc).date()
     xd = today - datetime.timedelta(days=30) 
@@ -130,7 +153,8 @@ def init_callbacks(dash_app):
 
     ############################################## HEATMAP/TIMELINE ##########################################
 
-    corr_df = create_corr(pairs_crypto)
+    corr_df = create_corr(pairs_crypto_db)
+    #corr_df.columns = corr_df.columns.str.capitalize()
 
     corr_df_new = create_corr_new(pairs_mixed)
 
@@ -138,7 +162,9 @@ def init_callbacks(dash_app):
     # 000 - CUSTOM PAGE DATA
     ####################################################################################################
 
-    data = get_data()
+    data = get_dashboard_data(['spy', 'agg', 'btcusd'])
+    data = data.dropna()
+    data.index = pd.to_datetime(data.index)
     returns = calculate_controls(data)
 
     results_control = returns[0]
@@ -150,6 +176,7 @@ def init_callbacks(dash_app):
     ####################################################################################################
     # DASHBOARD PAGE
     ####################################################################################################
+
 
     @dash_app.callback(
         [
@@ -163,7 +190,7 @@ def init_callbacks(dash_app):
     )
     def update_graphs(value):
         # print(value)
-        # ------------------------------------------------------------------------------Pie Chart ---------------------------------------------------------------------------
+        # ------------------------------------------------------------------------------Pie Chart --------------------------------------------------------------------------
         value_dict = {
             0: 1,
             0.5: 2,
@@ -206,7 +233,7 @@ def init_callbacks(dash_app):
                 color_discrete_sequence=colors_pie,
                 title="Portfolio Allocation",
                 # width = 400, height = 400
-                template=onramp_template,
+                template=onramp_template_dark,
                 height=500,
                 hole = .2
             )
@@ -216,7 +243,7 @@ def init_callbacks(dash_app):
                 font=dict(family="Roboto", color= onramp_colors["gray"]),
                 title={
                     "text": "<b>Portfolio Allocation<b>",
-                    "y": 1,
+                    "y": .99,
                     "x": 0.49,
                     "xanchor": "center",
                     "yanchor": "top",
@@ -230,7 +257,7 @@ def init_callbacks(dash_app):
             )
             fig.update_traces(textfont_size=17, marker=dict( line=dict(color='white', width=1)))
             fig.update_layout(titlefont=dict(size=24, color= onramp_colors["gray"]))
-            fig.update_layout(margin=dict(l=20, r=0, t=40, b=0))
+            fig.update_layout(margin=dict(l=20, r=2, t=50, b=0))
 
             return fig
 
@@ -256,7 +283,7 @@ def init_callbacks(dash_app):
                 labels={"value": "", "Date": "", "color": "", "variable": ""},
                 title="Portfolio Performance",
                 color_discrete_map=color_dict,
-                template=onramp_template,
+                template=onramp_template_dark,
                 height = 500
                 # width = 450
             )
@@ -270,7 +297,7 @@ def init_callbacks(dash_app):
                 font=dict(family="Roboto", color= onramp_colors["gray"]),
                 title={
                     "text": "<b>Portfolio Performance<b>",
-                    "y": 1,
+                    "y": .99,
                     "x": 0.5,
                     "xanchor": "center",
                     "yanchor": "top",
@@ -317,7 +344,7 @@ def init_callbacks(dash_app):
                 # color_discrete_sequence=['#A90BFE','#FF7052','#66F3EC', '#67F9AF'],
                 color_discrete_sequence=colors,
                 opacity=1,
-                template=onramp_template,
+                template=onramp_template_dark,
                 labels={
                     "x": "",
                     "y": "Annual Return",
@@ -338,12 +365,12 @@ def init_callbacks(dash_app):
             fig.update_layout(
                 title={
                     "text": "<b>Risk vs. Return<b>",
-                    "y": 1,
+                    "y": .99,
                     "x": 0.5,
                     "xanchor": "center",
                     "yanchor": "top",
                 },
-                font=dict(family="Circular STD", color="black"),
+                font=dict(family="Roboto", color= onramp_colors["gray"]),
                 legend=dict(
                     orientation="h", yanchor="bottom", y=-0.35, xanchor="left", x=0.1
                 ),
@@ -391,7 +418,7 @@ def init_callbacks(dash_app):
             colors = [onramp_colors['dark_blue'], "#3fb6dc", "#f2a900"]
             if x_axis_rr_ss[0] == "Ann. Return":
                 title = "<b>Ann. Return & Risk<b>"
-                max_range = 0.4
+                max_range = 0.5
             else:
                 title = "<b>Sharpe & Sortino Ratio<b>"
                 for i in range(len(y_combined)):
@@ -428,7 +455,7 @@ def init_callbacks(dash_app):
                 color="Strategy",
                 barmode="group",
                 color_discrete_sequence=colors,
-                template=onramp_template,
+                template=onramp_template_dark,
                 labels={"Type": "", "Values": "", "Strategy": ""},
                 height = 490
             )
@@ -442,7 +469,7 @@ def init_callbacks(dash_app):
             else:
                 fig.update_traces(texttemplate="<b>%{y:.9}<b>", textposition="outside")
                 fig.update_traces(hovertemplate="%{y:.3}")
-            fig.update_layout(uniformtext_minsize=21, uniformtext_mode="hide")
+            fig.update_layout(uniformtext_minsize=21, uniformtext_mode='show')
             fig.update_yaxes(showticklabels=False)
             fig.update_yaxes(range=[0, max_range])
             fig.update_layout(
@@ -453,7 +480,7 @@ def init_callbacks(dash_app):
                     "xanchor": "center",
                     "yanchor": "top",
                 },
-                font=dict(family="Circular STD", color="white"),
+                font=dict(family="Roboto", color="white"),
                 legend=dict(
                     orientation="h", yanchor="bottom", y=-0.3, xanchor="left", x=0.20
                 ),
@@ -461,20 +488,24 @@ def init_callbacks(dash_app):
                 bargap=0.15,  # gap between bars of adjacent location coordinates.
                 bargroupgap=0.1,  # gap between bars of the same location coordinate.
             )
-            # fig.update_layout(
-            #     {"plot_bgcolor": "rgba(0, 0, 0, 0)", "paper_bgcolor": "rgba(0, 0, 0, 0)",}
-            # )
+            fig.update_layout(
+                {"plot_bgcolor": "rgba(0, 0, 0, 0)", "paper_bgcolor": "rgba(0, 0, 0, 0)",}
+            )
             fig.update_layout(xaxis_tickfont_size=19)
             fig.update_layout(titlefont=dict(size=24, color="white"))
-            fig.update_layout(margin = dict(l=10, r=0, t=20, b=0))
+            fig.update_layout(margin = dict(l=10, r=0, t=50, b=0))
 
             return fig
+
+        #Variables that store the graphs so when the color changes no need to recalculate 
+        
 
         pie_fig = graph_pie(percent_dict)
         line_fig = graph_line_chart(df, choice)
         scatter_fig = graph_scatter_plot(risk_dic, return_dic)
         bar_rr_fig = graph_barchart(x_axis_rr, y_combined_rr, y_6040_rr, y_spy_rr)
         bar_ss_fig = graph_barchart(x_axis_ss, y_combined_ss, y_6040_ss, y_spy_ss)
+        
         return pie_fig, line_fig, scatter_fig, bar_rr_fig, bar_ss_fig
 
     ####################################################################################################
@@ -486,7 +517,6 @@ def init_callbacks(dash_app):
         [dash.dependencies.Input("dropdown", "value")],
     )
     def update_vol(value):
-        
         def graph_volatility(df, coins, xd):
             source = "Binance"
             yaxis_dict = dict(
@@ -500,6 +530,7 @@ def init_callbacks(dash_app):
                 tickprefix="                 ",
             )
             vols = [14, 30, 90]
+
             colors = 6 * [
                 "grey",
                 "#033F63",
@@ -630,7 +661,7 @@ def init_callbacks(dash_app):
             return fig
 
         if value == "CC":
-            return graph_volatility(df_vol, pairs_crypto, c)
+            return graph_volatility(df_vol, pairs_crypto_db, c)
         if value == "AC":
             return graph_volatility(df_mixed, pairs_mixed, c)
     
@@ -645,11 +676,23 @@ def init_callbacks(dash_app):
     )
     def update_vol(value):
         
-        
-        df = calc_volatility_btc_vol([f"{value}-USDT"]) #Used for Crypto Vol Chart
+        pairs_crypto_db_dict = {
+        "BTC"   :"bitcoin",
+        "BCHABC":"bitcoin-cash",
+        "TRX"   :"tron",
+        "LINK"  :"chainlink",
+        "XLM"   :"stellar",
+        "EOS"   :"eos",
+        "ADA"   :"cardano",
+        "LTC"   :"litecoin",
+        "NEO"   :"neo",
+        "BNB"   :"binance-coin",
+        "ETH"   :"ethereum",
+        }
 
-        #print(df)
-        df_btc = df[[f'{value}_vol_30', f'{value}_vol_60', f'{value}_vol_7', f'{value}_vol_14']].copy() #Annualized bitcoin vol chart
+        name = pairs_crypto_db_dict[value]
+        df = calc_volatility_annualized([name]) #Used for Crypto Vol Chart
+        df_btc = df[[f'{name}_vol_30', f'{name}_vol_60', f'{name}_vol_7', f'{name}_vol_14']].copy() #Annualized bitcoin vol chart
 
         df_btc.columns = ['Ann. 30D Volatility', 'Ann. 60D Volatility', 'Ann. 7D Volatility', 'Avg30DVolatility']
 
@@ -681,7 +724,7 @@ def init_callbacks(dash_app):
                 font=dict(family="Roboto", color="white"),
                 title={
                     "text": f"<b>Annualized 30D & 60D Volatility - {value}<b>",
-                    "y": 1,
+                    "y": .99,
                     "x": 0.5,
                     "xanchor": "center",
                     "yanchor": "top",
@@ -730,11 +773,11 @@ def init_callbacks(dash_app):
                                                     fill_color= '#b0b6bd',
                                                     align=['center','center', 'center'],
                                                     height = 50,
-                                                    font=dict(color='black', size=30, family = "roboto")),
+                                                    font=dict(color='black', size=30, family = "Roboto")),
                                         cells=dict(values=[['Ann. 7D Volatility', 'Ann. 30D Volatility', 'Ann. 60D Volatility'], [str(round(a7*100, 2))+'%', str(round(a30*100, 2))+'%', str(round(a60*100, 2))+'%'], [str(round(df_btc['Ann. 7D Volatility'].iloc[-1]*100, 2))+'%', str(round(df_btc['Ann. 30D Volatility'].iloc[-1]*100, 2))+'%', str(round(df_btc['Ann. 60D Volatility'].iloc[-1]*100, 2))+'%']],
                                                     line_color = 'white',
                                                     height = 40,
-                                                    font = dict(color = 'white', size = 20, family = "roboto"),
+                                                    font = dict(color = 'white', size = 20, family = "Roboto"),
                                                     fill_color = '#131c4f' )) ])
             fig.update_layout(margin = dict(l=1, r=0, t=0, b=0))
             fig.update_layout(
@@ -759,6 +802,7 @@ def init_callbacks(dash_app):
     )
     def update_heatmap(value):
         def graph_heatmap(df, date):
+
             corr_mtx = df.loc[date].values
             text_info = np.round(corr_mtx, decimals=5).astype(str)
 
@@ -819,6 +863,7 @@ def init_callbacks(dash_app):
             return fig
 
         if value == "CC":
+            corr_df.columns = corr_df.columns.str.capitalize()
             return graph_heatmap(corr_df, c)
         if value == "AC":
             return graph_heatmap(corr_df_new, c)
@@ -832,6 +877,7 @@ def init_callbacks(dash_app):
     )
     def update_timeline(value):
         def graph_timeline(corr_df, xd):
+            
             _font = dict(family="Roboto", color = 'white')
             source = "Binance"
             axis_dict = dict(
@@ -982,6 +1028,8 @@ def init_callbacks(dash_app):
     ####################################################################################################
     # CUSTOM STRATEGY PAGE
     ####################################################################################################
+    
+    
     @dash_app.callback(
         [Output('pie_chart_c', 'figure'),
         Output('line_chart_c', 'figure'),
@@ -989,10 +1037,13 @@ def init_callbacks(dash_app):
         Output("stats_table", "figure"),
         Output("month_table", "figure"),
         Output("balance_table", "figure"),
-        Output("return_stats", "figure")
+        Output("return_stats", "figure"),
+        Output("alloc_alert", "is_open"),
+        #Output("pie_card", "color")
         ],
         
         Input("submit_button", "n_clicks"),
+        #Input("mode_switch", "n_clicks"),
         State('Ticker1', 'value'),
         State('Allocation1', 'value'),
         State('Ticker2', 'value'),
@@ -1001,17 +1052,71 @@ def init_callbacks(dash_app):
         State('Allocation3', 'value'),
         State('Ticker4', 'value'),
         State('Allocation4', 'value'),
-        State('Rebalance', 'value')
+        State('Frequency_sel', 'value'),
+        State("alloc_alert", "is_open"),
+        State('Rebalance', 'value'),
         
     )
-    def update_graph(num_click, stock_choice_1, alloc1, stock_choice_2, alloc2, stock_choice_3, alloc3, stock_choice_4, alloc4, rebalance = 1.2):
+    def update_graph(num_click, stock_choice_1, alloc1, stock_choice_2, alloc2, stock_choice_3, alloc3, stock_choice_4, alloc4,  freq_sel, alloc_alert, rebalance = 1.2):
         start = time.time()
+
+       
+
+
+        # ########################################### LIGHT MODE ################################################
+        # #Global variables because we want to be able to access the last graphs without recalculating everything 
+        # global fig_pie 
+        # global fig_line
+        # global fig_scat
+        # global fig_stats 
+        # global fig_month_table 
+        # global fig_balance_table 
+        # global fig_returns_stats 
+        # global alert
+        # global mode 
+        # global bg_color 
+
+        
+        
+
+        # if mode_click == 0: #first run through to just set all the variables, so theres no errors 
+        #     print("set to None")
+        #     mode = "dark"
+        #     bg_color = onramp_colors["dark_blue"]
+        #     fig_pie = None 
+        #     fig_line = None 
+        #     fig_scat = None 
+        #     fig_stats = None 
+        #     fig_month_table = None 
+        #     fig_month_table = None 
+        #     fig_balance_table = None 
+        #     fig_returns_stats = None 
+        #     alert = None
+
+        # if mode_click: #If the light mode is clicked
+        #     if mode == "dark":
+        #         mode = "light"
+        #         template_ = onramp_template_light
+        #         template_d = onramp_template_dashboard_light
+        #         bg_color = onramp_colors["white"]
+        #     else: 
+        #         mode = "dark"
+        #         template_ = onramp_template_dark
+        #         template_d = onramp_template_dashboard_dark
+        #         bg_color = onramp_colors["dark_blue"]
+        #     #template = onramp_template_{mode}.format
+        #     fig_pie.update_layout(template = template_)
+        #     fig_line.update_layout(template = template_d)
+        #     fig_scat.update_layout(template = template_d)
+        #     return fig_pie, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats, alert, bg_color
+
+
         ####################################################### PIE CHART ##########################################################################################
         stock_list_pie = [stock_choice_1, stock_choice_2, stock_choice_3, stock_choice_4]
         percent_list = [float(alloc1)/100, float(alloc2)/100, float(alloc3)/100, float(alloc4)/100]
 
-        fig = plotly_pie(stock_list_pie, percent_list)
-        #px.pie( values = percent_list, names = stock_list_pie, color = stock_list_pie, title="", template= onramp_template, hole = .3, height = 300)
+        
+        
         
         ##################################################### SETTING UP DATA #############################################################################################
         stock_choice_1 = stock_choice_1.lower()
@@ -1020,47 +1125,43 @@ def init_callbacks(dash_app):
         stock_choice_4 = stock_choice_4.lower()
         stock_list_pie = [stock_choice_1, stock_choice_2, stock_choice_3, stock_choice_4]
         
-        #stock_list = stock_choice_1 +',' + stock_choice_2 + ',' + stock_choice_3 + ',' + stock_choice_4
         
-        data_s = time.time()
-        #data = bt.get(stock_list, start = '2017-01-01')
-        data = pd.DataFrame()
-        #context = pa.default_serialization_context()
-        for ticker in stock_list_pie:
-            data_x = r.get(ticker)
-            if data_x is None:
-                print("Could not find", ticker, "in the cache.")
-                data_x = bt.get(ticker, start = '2017-01-01')
-                r.set(ticker, data_x)
-                r.expire(ticker, timedelta(seconds = 86400))
+        
+        
+        #-----------------OLD REDIS DATA FETCHING-------------------------------
+        # data = pd.DataFrame()
+        # for ticker in stock_list_pie:
+        #     data_x = r.get(ticker)
+        #     if data_x is None:
+        #         print("Could not find", ticker, "in the cache.")
+        #         data_x = bt.get(ticker, start = '2017-01-01')
+        #         r.set(ticker, data_x)
+        #         r.expire(ticker, timedelta(seconds = 86400))
 
+        #     data = data.join(data_x, how = 'outer')
+
+        #--------------NEW DATABSE DATA FETCHING 
+        data_s = time.time()
+        data = pd.DataFrame()
+        for ticker in stock_list_pie:
+            
+            try: 
+                no_dash = ticker
+                if '-' in ticker:
+                    no_dash = ticker.replace('-', '')
+                data_x = get_dashboard_data([no_dash])
+                #print(data_x)
+                print("Got", ticker)
+            except:
+                print("Could not find", ticker, "in the DB.")
+                data_x = bt.get(ticker, start = '2017-01-01')
             data = data.join(data_x, how = 'outer')
         
-
-
-
-
-        # data1 = r.get(stock_choice_1)
-        # context = pa.default_serialization_context()
-        # if data1 is None:
-        #     print("Could not find", stock_choice_1, "in the cache.")
-        #     data1 = bt.get(stock_choice_1, start = '2017-01-01')
-        #     r.set(stock_choice_1, context.serialize(data1).to_buffer().to_pybytes())
-
-        # data1 = bt.get(stock_choice_1, start = '2017-01-01')
-        # data2 = bt.get(stock_choice_2, start = '2017-01-01')
-        # data3 = bt.get(stock_choice_3, start = '2017-01-01')
-        # data4 = bt.get(stock_choice_4, start = '2017-01-01')
-        # data_2 = pd.DataFrame()
-        # data_2 = data_2.join(data1, how = 'outer')
-        # print(data_2)
-        # data = data1.join(data2, how='outer')
-        # data = data.join(data3, how='outer')
-        # data = data.join(data4, how='outer')
         data = data.dropna()
-        #print(data)
+        data.index = pd.to_datetime(data.index) 
         data_e = time.time()
-        print("Finished Data", stock_choice_1, ":", data_e - data_s)
+        print("Finished Data:", data_e - data_s)
+
 
         #need the '-' in cryptos to get the data, but bt needs it gone to work
         data_st = time.time()
@@ -1075,7 +1176,18 @@ def init_callbacks(dash_app):
         if(rebalance == None or rebalance == ""):
             rebalance = 120
         rebalance = float(rebalance)/100
-        strategy_ = bt.Strategy("Custom Strategy", 
+
+        if freq_sel == 'Daily':
+            strategy_ = bt.Strategy("Custom Strategy D", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunDaily(),
+                                bt.algos.Rebalance()]) #Creating strategy
+        if freq_sel == 'Month':
+            strategy_ = bt.Strategy("Custom Strategy M", 
                                 [ 
                                 bt.algos.RunDaily(),
                                 bt.algos.SelectAll(), 
@@ -1083,20 +1195,94 @@ def init_callbacks(dash_app):
                                 RebalanceAssetThreshold(threshold = rebalance),
                                 bt.algos.RunMonthly(),
                                 bt.algos.Rebalance()]) #Creating strategy
+        if freq_sel == 'Quart' or freq_sel == 'Compare':
+            strategy_ = bt.Strategy("Custom Strategy Q", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunQuarterly(),
+                                bt.algos.Rebalance()]) #Creating strategy
+        if freq_sel == 'Year':
+            strategy_ = bt.Strategy("Custom Strategy Y", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunYearly(),
+                                bt.algos.Rebalance()]) #Creating strategy
 
         test = bt.Backtest(strategy_, data)
         results = bt.run(test)
         
         results_list = [results, results_control, results_spy, results_agg]
-        
-        data_et = time.time()
-        print("Finished Strategy", stock_choice_1, ":", data_et - data_st)
-        ################################################### LINE CHART ########################################################################################################
-        fig_line = line_chart(results_list)
-        fig_line.update_layout(template = onramp_template_dashboard) #legend in top left
+        results_list_t = results_list
 
-        fig_scat = scatter_plot(results_list)
-        fig_scat.update_layout(template = onramp_template_dashboard) #legend in top left
+        data_et = time.time()
+        print("Finished Strategy:", data_et - data_st)
+        ################################################### LINE CHART ########################################################################################################
+        
+        if freq_sel == 'Compare':
+            strategy_d = bt.Strategy("Daily Rebalance", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunDaily(),
+                                bt.algos.Rebalance()]) #Creating strategy
+            
+            strategy_m = bt.Strategy("Monthly Rebalance", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunMonthly(),
+                                bt.algos.Rebalance()]) #Creating strategy
+            
+            strategy_q = bt.Strategy("Quarterly Rebalance", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunQuarterly(),
+                                bt.algos.Rebalance()]) #Creating strategy
+            
+            strategy_y = bt.Strategy("Yearly Rebalance", 
+                                [ 
+                                bt.algos.RunDaily(),
+                                bt.algos.SelectAll(), 
+                                bt.algos.WeighSpecified(**stock_dic),
+                                RebalanceAssetThreshold(threshold = rebalance),
+                                bt.algos.RunYearly(),
+                                bt.algos.Rebalance()]) #Creating strategy
+            
+            test = bt.Backtest(strategy_d, data)
+            results_d = bt.run(test)
+
+            test = bt.Backtest(strategy_m, data)
+            results_m = bt.run(test)
+
+            test = bt.Backtest(strategy_q, data)
+            results_q = bt.run(test)
+
+            test = bt.Backtest(strategy_y, data)
+            results_y = bt.run(test)
+        
+            results_list_t = [results_d, results_m, results_q, results_y, results_control]
+            
+            
+        fig_pie = plotly_pie(stock_list_pie, percent_list)
+
+        fig_line = line_chart(results_list_t) #use t so we can do the compare all 
+        fig_line.update_layout(template = onramp_template_dashboard_dark) #legend in top left
+
+        fig_scat = scatter_plot(results_list_t)
+        fig_scat.update_layout(template = onramp_template_dashboard_dark) #legend in top left
 
         fig_stats = stats_table(results_list)
 
@@ -1113,10 +1299,16 @@ def init_callbacks(dash_app):
         fig_returns_stats.update_layout(height = 320)
 
         end = time.time()
-        print("Finished Everything", stock_choice_1, ":", end - start)
-        return fig, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats
+        print("Finished Everything:", end - start)
+
+        alert = False
+        if (float(alloc1) + float(alloc2) + float(alloc3) + float(alloc4)) > 100:
+            alert = True
+        return fig_pie, fig_line, fig_scat, fig_stats, fig_month_table, fig_balance_table, fig_returns_stats, alert
 
 
+    ######################################## LIGHT MODE CALLBACKS #####################################
+   
     ####################################################################################################
     # PORTFOLIO OPTIMIZER PAGE
     ####################################################################################################
@@ -1140,27 +1332,50 @@ def init_callbacks(dash_app):
         
         tickers = tickers.replace(" ", '') #remove any extra spaces
         tickers_list = tickers.split(',')
+        tickers_list = [each_string.lower() for each_string in tickers_list]
 
         c_tickers = crypto_tickers.replace(" ", '') #remove any extra spaces
         c_tickers_list = c_tickers.split(',')
+        c_tickers_list = [each_string.lower() for each_string in c_tickers_list]
 
         full_asset_list = tickers_list + c_tickers_list
+
+        #full_asset_list = [each_string.lower() for each_string in full_asset_list]
         
         ####################################################################################################################################################
         ############### GET DATA
         ####################################################################################################################################################
+        #-------------------------OLD REDIS DATA FETCH-------------------------------------------------------------------------------
+        # data = pd.DataFrame()
+        # for ticker in full_asset_list:
+        #     data_x = r.get(ticker)
+        #     if data_x is None:
+        #         print("Could not find", ticker, "in the cache.")
+        #         data_x = bt.get(ticker, start = '2017-01-01')
+        #         r.set(ticker, data_x)
+        #         r.expire(ticker, timedelta(seconds = 86400))
+
+        #     data = data.join(data_x, how = 'outer')
+        
+        # data = data.dropna()
+
         data = pd.DataFrame()
         for ticker in full_asset_list:
-            data_x = r.get(ticker)
-            if data_x is None:
-                print("Could not find", ticker, "in the cache.")
+            
+            try: 
+                no_dash = ticker
+                if '-' in ticker:
+                    no_dash = ticker.replace('-', '')
+                data_x = get_dashboard_data([no_dash])
+                print("Got", ticker)
+            except:
+                print("Could not find", ticker, "in the DB.")
                 data_x = bt.get(ticker, start = '2017-01-01')
-                r.set(ticker, data_x)
-                r.expire(ticker, timedelta(seconds = 86400))
-
             data = data.join(data_x, how = 'outer')
         
         data = data.dropna()
+        data.index = pd.to_datetime(data.index)
+
         if(crypto_max == None or crypto_max == ""): #In order to make crypto allocation optional
             crypto_max = 120
         crypto_max = float(crypto_max)/100
@@ -1222,6 +1437,7 @@ def init_callbacks(dash_app):
 
         crypto_tickers = crypto_tickers.replace('-', '')
         crypto_list = crypto_tickers.split(',')
+        crypto_list = [x.lower() for x in crypto_list]
         only_stock_list = tickers_list
         crypto_sum = 0
         stock_sum = 0
@@ -1304,11 +1520,11 @@ def init_callbacks(dash_app):
 
         results_list = [results_op_d, results_control, results_spy, results_agg]
         fig_line = line_chart(results_list)
-        fig_line.update_layout(template = onramp_template_dashboard)
+        fig_line.update_layout(template = onramp_template_dashboard_dark)
 
         
         fig_scat = scatter_plot(results_list) #scatter function in functions
-        fig_scat.update_layout(template = onramp_template_dashboard)
+        fig_scat.update_layout(template = onramp_template_dashboard_dark)
 
         fig_stats = stats_table(results_list)
 

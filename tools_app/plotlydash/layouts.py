@@ -9,6 +9,7 @@ import dash_html_components as html
 from dash_bootstrap_components._components.CardBody import CardBody
 from dash_bootstrap_components._components.Row import Row
 import dash_bootstrap_components as dbc
+import dash_daq as daq
 import plotly.graph_objs as go
 import pandas as pd
 import numpy as np 
@@ -17,7 +18,7 @@ from direct_redis import DirectRedis
 import urllib.parse as urlparse
 from datetime import timedelta
 from .formatting import onramp_colors, externalgraph_rowstyling, externalgraph_colstyling, recapdiv
-from .helpers import calc_volatility_btc_vol, line_chart, scatter_plot
+from .helpers import line_chart, scatter_plot
 
 url = urlparse.urlparse('redis://default:mUtpOEwJc2F8tHYOGxF9JGvnIwHY3unu@redis-16351.c263.us-east-1-2.ec2.cloud.redislabs.com:16351')
 r = DirectRedis(host=url.hostname, port=url.port, password=url.password)
@@ -101,6 +102,7 @@ def get_navbar(p="dashboard"):
                 dbc.NavItem(dbc.NavLink("Dashboard", active=True, href="/apps/dashboard", style = {"color": "black", "outline-color": 'black'})),
                 dbc.NavItem(dbc.NavLink("Custom Strategy Dashboard", href="/apps/custom-dashboard", style = {"color": "black"})),
                 dbc.NavItem(dbc.NavLink("Portfolio Optimizer", href="/apps/portfolio-optimizer", style = {"color": "black"})),
+                #dbc.NavItem(dbc.NavLink("Heat", href="/heat", style = {"color": "black"})),
                 #dbc.NavItem(dbc.NavLink("Crypto Indexes", href="/apps/crypto-index", style = {"color": "black"})),
                 dbc.DropdownMenu(
                     [
@@ -387,7 +389,6 @@ def get_emptyrow(h="45px"):
     )
 
     return emptyrow
-
 
 ####################################################################################################
 # 001 - Portfilio Modeling
@@ -720,7 +721,7 @@ btc_vol_page = html.Div(
                                                 {"label": "Bitcoin", "value": "BTC",},
                                                 {"label": "Bitcoin Cash ABC", "value": "BCHABC",},
                                                 {"label": "Tron", "value": "TRX",},
-                                                {"label": "Iota", "value": "IOTA",},
+                                                {"label": "Chainlink", "value": "LINK",},
                                                 {"label": "Stellar Lumen", "value": "XLM",},
                                                 {"label": "Eos", "value": "EOS",},
                                                 {"label": "Cardano", "value": "ADA",},
@@ -728,7 +729,6 @@ btc_vol_page = html.Div(
                                                 {"label": "Neo", "value": "NEO",},
                                                 {"label": "Binance Coin", "value": "BNB",},
                                                 {"label": "Ethereum", "value": "ETH",},
-                                                
                                             ],
                                             value="BTC",
                                         ),
@@ -1048,7 +1048,7 @@ def Inputs():
                             style = {"width" : "100%", "height": "60%"}
 
                         ),
-                    ],width={'size':4}, className= " mb-4", 
+                    ],width={'size':6}, className= " mb-4", 
                     ), 
 
                     dbc.Col([
@@ -1064,7 +1064,7 @@ def Inputs():
                             ), 
                             dbc.InputGroupAddon("%", addon_type = "append"),
                         ], size = 'sm' )
-                        ],width={'size': 6, 'offset':1},
+                        ],width={'size': 5, 'offset':1},
                     ),
                 ]),
 
@@ -1080,7 +1080,7 @@ def Inputs():
                             style = {"width" : "100%", "height": "100%"}
 
                         ),
-                    width={'size':4}, className= "mb-4"
+                    width={'size':6}, className= "mb-4"
                     ), 
 
                     dbc.Col([
@@ -1095,7 +1095,7 @@ def Inputs():
                             ), 
                             dbc.InputGroupAddon("%", addon_type = "append"),
                         ], size = 'sm')
-                    ], width={'size':6, 'offset':1}),
+                    ], width={'size':5, 'offset':1}),
                 ]),
 
                 #Inputs 3 
@@ -1110,7 +1110,7 @@ def Inputs():
                             style = {"width" : "100%", "height": "100%"}
 
                         ),
-                    width={'size':4}, className= "mb-4"
+                    width={'size':6}, className= "mb-4"
                     ), 
 
                     dbc.Col([
@@ -1125,7 +1125,7 @@ def Inputs():
                             ), 
                             dbc.InputGroupAddon("%", addon_type = "append"),
                         ], size = 'sm')
-                        ], width={'size':6, 'offset':1},
+                        ], width={'size':5, 'offset':1},
                     ),
                 ]),
 
@@ -1141,7 +1141,7 @@ def Inputs():
                             style = {"width" : "100%", "height": "100%"}
 
                         ),
-                    width={'size':4}, className= "mb-2"
+                    width={'size':6}, className= "mb-2"
                     ), 
 
                     dbc.Col([
@@ -1155,18 +1155,40 @@ def Inputs():
                         ), 
                         dbc.InputGroupAddon("%", addon_type = "append"),
                         ], size = 'sm')
-                        ],width={'size':6, 'offset':1},
+                        ],width={'size':5, 'offset':1},
                     ),
                 ]),
-
+                
                 #Inputs 5 
                 dbc.Row([
-                    dbc.Col(
-                    width={'size':4}, className= "mb-4" #Empty Col for Rebalance 
+                    dbc.Col([
+                        dbc.FormText("Rebalance Freq"),
+                        dbc.Select(
+                            id = "Frequency_sel",
+                            options=[
+                                {"label": "Daily Rebalance", "value": "Daily"},
+                                {"label": "Monthly Rebalance", "value": "Month"},
+                                {"label": "Quarterly Rebalance", "value": "Quart"},
+                                {"label": "Yearly Rebalance", "value": "Year"},
+                                {"label": "Compare All", "value": "Compare"},
+                            ],
+                            value = "Quart",
+                            style = {"width" : "100%", "height": "52%"}
+                        ),
+                        dbc.Popover(
+                            children = [
+                            dbc.PopoverHeader("Rebalance Frequency", style = {"color": "black"}),
+                            dbc.PopoverBody("Desired interval at which a rebalance occurs."),
+                            ],
+                            id = "pop_freq",
+                            target = "Frequency_sel",
+                            trigger = "hover"
+                        ),
+                    ], width={'size':6}, className= "mb-2" #Empty Col for Rebalance 
                     ), 
 
                     dbc.Col([
-                        dbc.FormText("Rebalance Threshold %"),
+                        dbc.FormText("Rebalance %"),
                         dbc.InputGroup([
                             dbc.Input(
                                 id = "Rebalance",
@@ -1186,22 +1208,39 @@ def Inputs():
                             id = "pop_rebal",
                             target = "Rebalance",
                             trigger = "hover"
-                        )
-                        ],width={'size':6, 'offset':1}, className= "mb-4"
+                        ),
+                        
+                        ],width={'size':5, 'offset':1}, className= "mb-4"
                     ),
                 ]),
-
+                dbc.Row(
+                    dbc.Col(
+                        dbc.Alert(
+                                "Allocation Should be 100%",
+                                id="alloc_alert",
+                                dismissable=True,
+                                fade=False,
+                                is_open=False,
+                                color = "danger",
+                                style = {"height": 45},
+                                duration = 4000
+                        ),
+                    width = {'size': 12}
+                    )
+                ),
                 #Submit Button
                 dbc.Row([
                     
-                    dbc.Col(
+                    dbc.Col([
                         dbc.Button(
                             id = "submit_button",
                             children= "Create Strategy",
                             n_clicks=0,
                             style= {"width": "100%", "height": "100%"}
 
-                        ), width={'size':11, 'offset':0},
+                        ), 
+                        
+                        ], width={'size':12, 'offset':0},
                     ),
                 ]),
                 
@@ -1212,7 +1251,10 @@ def Inputs():
 
 def DisplayPie():
     pie = dbc.Card([
-        dbc.CardHeader(children= html.H3("Portfolio Allocation"), style = {"font": "Roboto", "color": onramp_colors["gray"]}),
+        
+        dbc.CardHeader(children= html.H3("Portfolio Allocation"), 
+        style = {"font": "Roboto", "color": onramp_colors["black"]}
+        ),
         dbc.CardBody([
             
             dcc.Loading( id = "loading_pie", children=
@@ -1222,7 +1264,8 @@ def DisplayPie():
             )
             )
         ]),
-    ],  className= "text-center mb-2 mr-2", style= {"height": "28rem"}, color= onramp_colors["dark_blue"], inverse = True)
+        
+    ],  id = 'pie_card', className= "text-center mb-2 mr-2", style= {"height": "28rem"}, color= onramp_colors["dark_blue"], inverse = True)
 
     return pie
            
@@ -1262,7 +1305,7 @@ def DisplayStats():
             dcc.Loading(id = "loading_stats", children=
             dcc.Graph(
                 id = "stats_table",
-                style= {"responsive": True}
+                style= {"responsive": True, "height": 350}
             )
             )
         ]),  
@@ -1323,6 +1366,11 @@ custom_page = dbc.Container([
                     
                     html.P(children= "Use the following tool to build hypothetical portfolios of equities, ETFs, and various Cryptoassets.  Analyze the impact of cryptoassets modeled in a traditional portfolio allocation. Over time we will enable advisors to create custom reports for clients based on the output.", 
                             style = {"fontSize": "vmin", "color": onramp_colors["white"]}),
+                    
+                    # dbc.Button(
+                    #     "Click me", id="mode_switch", className="mr-2", n_clicks=0
+                    # ),
+                    
                 ]),
             className="text-center mb-2", color= onramp_colors["dark_blue"], inverse= True,), 
         width = 12)
@@ -1414,7 +1462,7 @@ def Inputs():
                         dbc.Input(
                             id = "Ticker_o",
                             type= 'text',
-                            value = "spy,agg,tsla,msft",
+                            value = "SPY,AGG,GOOG,MSFT",
                             placeholder= "Enter Tickers",
                             debounce = True,
                             style = {"width" : "100%", "height": "62%"}
@@ -1427,7 +1475,7 @@ def Inputs():
                         dbc.Input(
                             id = "cTicker_o",
                             type= 'text',
-                            value = "btc-usd,eth-usd",
+                            value = "BTC-USD,ETH-USD",
                             placeholder= "Enter Cryptos",
                             debounce = True,
                             style = {"width" : "100%", "height": "62%"}
@@ -1609,7 +1657,7 @@ def DisplayStats():
             dcc.Loading(id = "loading_stats", children=
             dcc.Graph(
                 id = "stats_table_o",
-                style= {"responsive": True}
+                style= {"responsive": True, "height": 350}
             )
             )
         ]),  

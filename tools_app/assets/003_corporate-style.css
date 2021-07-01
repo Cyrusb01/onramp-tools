@@ -13,6 +13,35 @@
 */
 /* change the background color */
 
+
+/* vietnamese */
+/* @font-face {
+  font-family: 'Roboto' !important;
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu72xKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+1EA0-1EF9, U+20AB;
+} */
+/* latin-ext */
+/* @font-face {
+  font-family: 'Roboto' !important;
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu72xKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+} */
+/* latin */
+/* @font-face {
+  font-family: 'Roboto' !important;
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu72xKKTU1Kvnz.woff2) format('woff2');
+  unicode-range: U+0020—007F; 
+} */
+
 .nav-pills .nav-link.active {
   color: #fff;
   background-color: #00eead;
@@ -56,9 +85,9 @@
 }
 
 .js-plotly-plot .plotly, .js-plotly-plot .plotly div{
-  font-family: Roboto;
+  font-family: "Roboto";
   src: url(https://fonts.gstatic.com/s/roboto/v27/KFOmCnqEu92Fr1Mu72xKKTU1Kvnz.woff2) format('woff2');
-  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+  
 }
 
 .slider-text{
@@ -72,7 +101,7 @@
 /* Html
 ––––––––––––––––––––––––––––––––––––––––––––––––––*/
 html {
-  font-family: "Angular Material" !important;
+  font-family: "Roboto" !important;
   background: rgb(66, 73, 114);
   background-repeat: no-repeat !important;
   background-size: cover !important;
@@ -85,7 +114,7 @@ html {
 /* Body
 ––––––––––––––––––––––––––––––––––––––––––––––––––*/
 body {
-  font-family: "Angular Material" !important;
+  font-family: "Roboto" !important;
   background-color: transparent; /* By default the body color is white, making any transparent component, actually white!*/
 }
 
@@ -170,7 +199,7 @@ img {
 /* Typography
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 h1, h2, h3, h4, h5, h6 {
-  font-family: "Angular Material" !important;
+  font-family: "Roboto" !important;
   margin-top: 0px;
   margin-bottom: 0px;
   padding-top: 3px;
@@ -184,3 +213,4 @@ h1, h2, h3, h4, h5, h6 {
 p {
   font-weight: 300;
 }
+

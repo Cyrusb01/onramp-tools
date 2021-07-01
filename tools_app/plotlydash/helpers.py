@@ -2,8 +2,14 @@ import pandas as pd
 import bt
 import plotly.express as px
 import plotly.graph_objects as go
-from .formatting import onramp_colors, onramp_template, onramp_template_dashboard
+from .formatting import onramp_colors, onramp_template_dark, onramp_template_dashboard_dark
+from .db_to_csv_transformer import eager_fetch_all_crypto_data
+from PIL import Image
 
+img = Image.open("tools_app/assets/onramp-logo-small.png")
+get_coin = eager_fetch_all_crypto_data()
+
+#Gets data from csvs to use in functions 
 def get_coin_data(symbol):
     df = pd.read_csv(f"datafiles/{symbol}_data.csv")
     res = df[
@@ -11,10 +17,13 @@ def get_coin_data(symbol):
     ].to_dict(orient="list")
     return res
 
+# "New refers to the Mixed Asset Graphs "
 def get_coin_data_new(symbol):
     df = pd.read_csv("datafiles/Multi_Asset_data.csv", usecols=["Timestamp", symbol])
     res = df.to_dict(orient="list")
     return res
+
+
 
 def volatility(price, period_value, data_interval):
     """
@@ -50,39 +59,40 @@ def volatility(price, period_value, data_interval):
 
 def calc_volatility(pairs):
     """
-    Get Graph For Each Coin You Want
+    Calculate Volitility For Graphs CRYPTOS
     """
     # create visuals
 
     df_all = dict()
     for sp in pairs:
         # calculate vol for each coin and graph
-        tmp = pd.DataFrame(get_coin_data(sp))
+        tmp = pd.DataFrame(get_coin(sp))
         tmp = tmp[["price_close", "timestamp"]]
         tmp.timestamp = pd.to_datetime(tmp.timestamp, unit="s")
         tmp.set_index("timestamp", inplace=True)
         for t in [14, 30, 90]:
-            df_all[f'{sp.split("-",1)[0]}_vol_{t}'] = volatility(
+            df_all[f'{sp}_vol_{t}'] = volatility(
                 tmp.price_close, t, data_interval= "1D"
             )
 
     return pd.DataFrame(df_all).dropna(how="all")
 
-def calc_volatility_btc_vol(pairs):
+def calc_volatility_annualized(pairs):
     """
-    Get Graph For Each Coin You Want
+    Calculate Volatility for the ANNUALIZED VOLATILITY
+    this function gives more volatility ranges (7, 60)
     """
     # create visuals
 
     df_all = dict()
     for sp in pairs:
         # calculate vol for each coin and graph
-        tmp = pd.DataFrame(get_coin_data(sp))
+        tmp = pd.DataFrame(get_coin(sp))
         tmp = tmp[["price_close", "timestamp"]]
         tmp.timestamp = pd.to_datetime(tmp.timestamp, unit="s")
         tmp.set_index("timestamp", inplace=True)
         for t in [14, 30, 90, 7, 60]:
-            df_all[f'{sp.split("-",1)[0]}_vol_{t}'] = volatility(
+            df_all[f'{sp}_vol_{t}'] = volatility(
                 tmp.price_close, t, data_interval= "1D"
             )
 
@@ -90,7 +100,7 @@ def calc_volatility_btc_vol(pairs):
 
 def calc_volatility_new(pairs):
     """
-    Get Graph For Each Coin You Want
+    Calculate Volitility For Graphs MIXED ASSET CLASSES 
     """
     # create visuals
 
@@ -108,10 +118,14 @@ def calc_volatility_new(pairs):
 
     return pd.DataFrame(df_all).dropna(how="all")
 
+
+
+
+
 def create_corr(pairs):
     vals = dict()
     for sp in pairs:
-        data = get_coin_data(sp)
+        data = get_coin(sp)
         if len(data) < 6:  # bad data
             print(sp, " ", len(data))
             continue
@@ -122,7 +136,7 @@ def create_corr(pairs):
     df_ = pd.DataFrame(vals)
     df_.index = pd.to_datetime(df_.index, unit="s")
     df_ = df_.pct_change(1).fillna(0)
-    df_.columns = [col.split("-", 1)[0] for col in df_.columns]
+    df_.columns = [col for col in df_.columns]
     df_ = df_.round(3).rolling(180).corr().dropna(how="all")
 
     return df_
@@ -198,7 +212,7 @@ def line_chart(results_list):
 
     fig = px.line(result_final, labels=dict(index="<b>Click Legend Icons to Toggle Viewing<b>", value="", variable=""),
                     title="",
-                    template= onramp_template
+                    template= onramp_template_dark
                     #height = 350
                     )
     
@@ -209,19 +223,30 @@ def line_chart(results_list):
         nticks = 20
     )
     fig.update_yaxes(tickvals=[100, 200, 400, 800])
-    # fig.update_layout(
-    #     legend = {
-    #         "xanchor": "left",
-    #         "x": .2,
-    #     }  
-    # )
+   
     fig.update_traces(hovertemplate = "%{y}<br>%{x}<extra></extra>")
+    img = Image.open("tools_app/assets/onramp-logo-small.png")
+    fig.add_layout_image(
+    dict(
+        source=img,
+        xref="paper", yref="paper",
+        x=.92, 
+        y=.1,
+        sizex=0.6, 
+        sizey=0.6,
+        xanchor="right", 
+        yanchor="bottom",
+        opacity = .1,
+
+    )
+    )
+    #fig.update_layout(template="plotly_white")
     return fig
 
 def plotly_pie(stock_list, percent_list):
     for i in range(len(stock_list)):
         stock_list[i] = stock_list[i].upper()
-    fig = px.pie( values = percent_list, names = stock_list, color = stock_list, template = onramp_template, hole = .3)
+    fig = px.pie( values = percent_list, names = stock_list, color = stock_list, template = onramp_template_dark, hole = .3)
     
     fig.update_traces(textfont_size=17, marker=dict( line=dict(color='white', width=1)))
     fig.update_layout(font = dict(color = "white"))
@@ -277,12 +302,27 @@ def scatter_plot(results_list):
                             "color" : ""
                             },
                             title="", 
-                            template= onramp_template,
+                            template= onramp_template_dark,
                             #width = 530, height = 350
                             )
     #fig.update_layout(legend = {"y": -.38})
     fig.update_traces(
                 hovertemplate="Annual Risk = %{x:.0}%<br>Annual Return = %{y:.0}%"
+    )
+    img = Image.open("tools_app/assets/onramp-logo-small.png")
+    fig.add_layout_image(
+    dict(
+        source=img,
+        xref="paper", yref="paper",
+        x=.92, 
+        y=.1,
+        sizex=0.6, 
+        sizey=0.6,
+        xanchor="right", 
+        yanchor="bottom",
+        opacity = .1,
+
+    )
     )
     
     return fig
@@ -304,7 +344,7 @@ def balance_table(results, results_con):
                                             line_color= 'rgba(100, 100, 100, 0.36)',
                                             fill_color= onramp_colors['cyan'],
                                             align=['center','center'],
-                                            font=dict(color='black', size=12)),
+                                            font=dict(color='black', size=15)),
                                 cells=dict(values=[['60-40 Portfolio', series_res.columns[0]], ["$100", "$100"], [final_con, final_res]],
                                             line_color = 'rgba(100, 100, 100, 0.36)',
                                             font = dict(color = [text_color*3], size = 12),
@@ -314,7 +354,8 @@ def balance_table(results, results_con):
             {
                 "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
                 "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
+            },
+            font=dict(family="Roboto")
         )
     fig.update_layout(margin = dict(l=1, r=1, t=0, b=0))
     
@@ -334,7 +375,7 @@ def short_stats_table(results_list):
     
     #adding new row of differences
     stats_combined['Difference'] = stats_combined.apply(lambda row: 
-                                        str(round(float(row.Your_Strategy.replace('%', ''))- float(row.Portfolio6040.replace('%', '')), 2)) + '%', axis = 1)  
+                                        str(round(float(row.Your_Strategy.replace('%', '').replace(',', ''))- float(row.Portfolio6040.replace('%', '').replace(',', '')), 2)) + '%', axis = 1)  
 
     text_color = []
     n = len(stats_combined)
@@ -344,11 +385,12 @@ def short_stats_table(results_list):
         else:
             text_color.append(onramp_colors['btc'])
     fig = go.Figure(data=[go.Table(
+                            columnwidth = [100, 120, 100, 100],
                             header=dict(values= labels,
                                         line_color= 'rgba(100, 100, 100, 0.36)',
                                         fill_color= onramp_colors['cyan'],
                                         align=['center','center'],
-                                        font=dict(color='black', size=12)),
+                                        font=dict(color='black', size=15)),
                             cells=dict(values=[stats_combined.index, stats_combined.Your_Strategy, stats_combined.Portfolio6040, stats_combined.Difference],
                                         line_color = 'rgba(100, 100, 100, 0.36)',
                                         height = 26,
@@ -358,9 +400,24 @@ def short_stats_table(results_list):
             {
                 "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
                 "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
+            },
+            font=dict(family="Roboto")
         )
     fig.update_layout(margin = dict(l=2, r=1, t=0, b=0))
+    fig.add_layout_image(
+    dict(
+        source=img,
+        xref="paper", yref="paper",
+        x=.7, 
+        y=.2,
+        sizex=0.6, 
+        sizey=0.6,
+        xanchor="right", 
+        yanchor="bottom",
+        opacity = .1,
+
+    )
+    )
     
     return fig
 
@@ -540,7 +597,10 @@ def monthly_table(results_list):
             {
                 "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
                 "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
+                
+            },
+            font=dict(family="Roboto")
+
         )
 
     return fig
@@ -561,7 +621,7 @@ def optomize_table(df):
                                         line_color= 'rgba(100, 100, 100, 0.36)',
                                         fill_color= onramp_colors["cyan"],
                                         align=['center','center'],
-                                        font=dict(color='black', size=12)),
+                                        font=dict(color='black', size=15)),
                             cells=dict(values=[df.index, df.Allocation],
                                         line_color = 'rgba(100, 100, 100, 0.36)',
                                         height = 30,
@@ -573,7 +633,8 @@ def optomize_table(df):
             {
                 "plot_bgcolor": "rgba(0, 0, 0, 0)",  # Transparent
                 "paper_bgcolor": "rgba(0, 0, 0, 0)",
-            }
+            },
+            font=dict(family="Roboto")
         )
     return fig
 
@@ -657,7 +718,7 @@ def stats_table(results_list):
                                         line_color= 'rgba(100, 100, 100, 0.36)',
                                         fill_color= onramp_colors["cyan"],
                                         align=['center','center'],
-                                        font=dict(color='black', size=12)),
+                                        font=dict(color='black', size=15)),
                             cells=dict(values=[df.Stats, df.Your_Strategy, df.Portfolio6040],
                                         line_color = 'rgba(100, 100, 100, 0.36)',
                                         height = 26,
@@ -665,8 +726,19 @@ def stats_table(results_list):
                                         fill_color =  onramp_colors["dark_blue"])) ])
     fig.update_layout(margin = dict(l=2, r=1, t=0, b=10), 
             paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",)
-
+            plot_bgcolor="rgba(0,0,0,0)",
+            font=dict(family="Roboto"))
+    fig.add_layout_image(dict(
+        source=img,
+        xref="paper", yref="paper",
+        x=.7, 
+        y=.23,
+        sizex=0.6, 
+        sizey=0.6,
+        xanchor="right", 
+        yanchor="bottom",
+        opacity = .1,
+    ))
     return fig
 
 

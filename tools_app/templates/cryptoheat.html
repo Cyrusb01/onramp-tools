@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+
+
+    
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" integrity="undefined" crossorigin="anonymous">
+
+    <link rel= "stylesheet" type= "text/css" href= "{{ url_for('static',filename='style.css') }}">
+<head>
+
+
+    <nav class="navbar navbar-expand-lg navbar-custom">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <ul class="navbar-nav nav-pills">
+            <li class="nav-item">
+                <a class="nav-link" href="/apps/dashboard">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/apps/custom-dashboard">Custom Strategy Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="/apps/portfolio-optimizer">Portfolio Optimizer</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="/heat">Crypto Heatmap</a>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Volatility Charts
+                  </a>
+                <div class="dropdown-menu">
+                <a class="dropdown-item" href="/apps/volatility-chart">Volatility Chart</a>
+                <a class="dropdown-item" href="/apps/annualized-volatility">Annualized Volatility</a>    
+                </div>
+            </li>
+            <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Correlation Charts</a>
+                <div class="dropdown-menu">
+                <a class="dropdown-item" href="/apps/correlation-matrix">Correlation Matrix</a>
+                <a class="dropdown-item" href="/apps/correlation-timeline">Correlation Over Time</a>    
+                </div>
+            </li>
+          </ul>
+        </div>
+    </nav>
+
+
+    <meta charset="utf-8">
+    <title>Crypto Heatmap
+    </title>
+   
+    
+</head>
+
+
+<body style="background-color:rgb(66, 73, 114);">
+    <div class = "container-fluid", style = "border: 0; width: 100%">
+        <div class="card bg-custom-1 mt-3 mb-3" style="width: 100%; background-color: #131c4f; color: white !important">
+            <div class="card-body">
+                <h1>Real Time Crypto Heatmap</h1>
+                <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. </p> 
+            </div>
+        </div>
+
+        <div>
+            <iframe src="https://cryptoheat.io/", style="border: 0; width: 90%; height: 920px; display: block;"></iframe>
+            
+        </div>
+    </div>
+    
+    
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+   
+    
+</body>
+
+</html>
