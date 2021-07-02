@@ -19,7 +19,8 @@ class RebalanceAssetThreshold(bt.Algo):
         
         
     def __call__(self, target):
-        
+        if self.threshold == 1.2:
+            return True
         if 'weights' not in target.temp:
             return True
         

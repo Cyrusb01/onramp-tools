@@ -1214,9 +1214,9 @@ def Inputs():
                     ),
                 ]),
                 dbc.Row(
-                    dbc.Col(
+                    dbc.Col([
                         dbc.Alert(
-                                "Allocation Should be 100%",
+                                children = "Allocation Should be 100%",
                                 id="alloc_alert",
                                 dismissable=True,
                                 fade=False,
@@ -1225,9 +1225,24 @@ def Inputs():
                                 style = {"height": 45},
                                 duration = 4000
                         ),
-                    width = {'size': 12}
+                    ], width = {'size': 12}
                     )
                 ),
+                #Naming 
+                # dbc.Row([
+                #     dbc.Col(
+                #         dbc.Input(
+                #             id = "Name",
+                #             type= 'text',
+                #             value = 'Custom 1',
+                #             placeholder= "Enter Name",
+                #             list = 'list-suggested-inputs',
+                #             style = {"width" : "100%", "height": "100%"}
+
+                #         ),
+                #     width={'size':6}, className= "mb-2"
+                #     ), 
+                # ]),
                 #Submit Button
                 dbc.Row([
                     
