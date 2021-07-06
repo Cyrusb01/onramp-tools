@@ -71,16 +71,15 @@ Folder PATH listing for volume Local Disk
 
 
 This app is hosted on heroku, with a $50 paid heroku DB. 
-
+```
 For Local Use
  Create local DB called onramp_research
  Take the link from your DB and put it into the alembic.ini 
  Take the link and store it as a an env variable DATABASE_URL, instead of "postgresql://" at the begining of your link, only do "postgres://" for env variable
  Run alembic upgrade head to create all the tables 
  Run the two scripts in the cron_db folder to populate the tables in the DB 
- Run wsgi.py to see the app 
- 
- 
+ Run wsgi.py to see the app
+
  
 NEEDS TO BE DONE 
     Cron job on heroku to automatically update data 
@@ -89,6 +88,6 @@ NEEDS TO BE DONE
     Light Mode switch 
     print the dashboard as a report 
     
-    
+ ```
  Long Term the app is going to possibly be converted fully into flask, which would require all dash layuouts to go into html and then new callbacks.  
  
